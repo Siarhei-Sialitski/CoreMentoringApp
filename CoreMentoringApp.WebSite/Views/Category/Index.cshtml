@@ -1,0 +1,15 @@
+﻿@model IEnumerable<CoreMentoringApp.WebSite.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<h1>Categories</h1>
+
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>@Html.DisplayFor(modelItem => item.CategoryName)</li>
+    }
+</ul>

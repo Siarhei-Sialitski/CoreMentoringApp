@@ -1,4 +1,5 @@
 using CoreMentoringApp.WebSite.Models;
+using CoreMentoringApp.WebSite.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,10 @@ namespace CoreMentoringApp.WebSite
                 options.UseSqlServer(connectionString);
                 options.UseLazyLoadingProxies();
             });
+
+            services.AddOptions<ProductViewOptions>()
+                .Bind(_configuration.GetSection(ProductViewOptions.ProductView))
+                .ValidateDataAnnotations();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

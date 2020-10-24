@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using CoreMentoringApp.WebSite.Models.Validators;
 
 namespace CoreMentoringApp.WebSite.Models
 {
@@ -10,8 +11,9 @@ namespace CoreMentoringApp.WebSite.Models
 
         [DisplayName("Name")]
         [StringLength(40, MinimumLength = 4)]
+        [Required]
         public string ProductName { get; set; }
-
+        
         public int? SupplierId { get; set; }
 
         public int? CategoryId { get; set; }
@@ -21,10 +23,11 @@ namespace CoreMentoringApp.WebSite.Models
         public string QuantityPerUnit { get; set; }
 
         [DisplayName("Unit Price")]
+        [DataType(DataType.Currency)]
         public decimal? UnitPrice { get; set; }
 
         [DisplayName("Units In Stock")]
-        [Range(0, short.MaxValue)]
+        [MinimumValue(0)]
         public short? UnitsInStock { get; set; }
 
         [DisplayName("Units On Order")]

@@ -6,6 +6,10 @@
 
 <h1>Products</h1>
 
+<div>
+    <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Create">Create new</a>
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -74,6 +78,10 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Discontinued)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ProductId">Edit</a>
+                <a asp-action="Details" asp-route-id="@item.ProductId">Details</a>
             </td>
         </tr>
 }

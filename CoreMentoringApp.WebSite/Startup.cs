@@ -27,7 +27,6 @@ namespace CoreMentoringApp.WebSite
             {
                 var connectionString = _configuration.GetConnectionString("NorthwindDataContext");
                 options.UseSqlServer(connectionString);
-                options.UseLazyLoadingProxies();
             });
 
             services.AddOptions<ProductViewOptions>()

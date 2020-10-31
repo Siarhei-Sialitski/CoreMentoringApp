@@ -1,5 +1,8 @@
+using AutoMapper;
+using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
+using CoreMentoringApp.WebSite.Profiles;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +32,13 @@ namespace CoreMentoringApp.WebSite
                 options.UseSqlServer(connectionString);
             });
 
+            services.AddScoped<IDataRepository, SqlDataRepository>();
+
             services.AddOptions<ProductViewOptions>()
                 .Bind(_configuration.GetSection(ProductViewOptions.ProductView))
                 .ValidateDataAnnotations();
+
+            services.AddAutoMapper(typeof(AutoMapperProfile));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

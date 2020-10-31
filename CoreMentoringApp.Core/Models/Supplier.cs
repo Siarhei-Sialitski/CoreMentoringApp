@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CoreMentoringApp.WebSite.Models
+namespace CoreMentoringApp.Core.Models
 {
     public class Supplier
     {

@@ -1,4 +1,4 @@
-namespace CoreMentoringApp.WebSite.Models
+namespace CoreMentoringApp.WebSite.ViewModels
 {
     public class ErrorViewModel
     {

@@ -1,4 +1,4 @@
-﻿using CoreMentoringApp.WebSite.Models;
+﻿using CoreMentoringApp.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreMentoringApp.WebSite.Controllers
@@ -6,16 +6,16 @@ namespace CoreMentoringApp.WebSite.Controllers
     public class CategoryController : Controller
     {
 
-        private readonly NorthwindDbContext _dbContext;
+        private readonly IDataRepository _dataRepository;
 
-        public CategoryController(NorthwindDbContext northwindDbContext)
+        public CategoryController(IDataRepository dataRepository)
         {
-            _dbContext = northwindDbContext;
+            _dataRepository = dataRepository;
         }
 
         public IActionResult Index()
         {
-            return View(_dbContext.Categories);
+            return View(_dataRepository.GetCategories());
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CoreMentoringApp.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreMentoringApp.WebSite.Models
 {

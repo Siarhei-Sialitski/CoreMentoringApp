@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using CoreMentoringApp.Core.Models;
+using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Logging;
-using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
+using CoreMentoringApp.WebSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,31 +14,29 @@ namespace CoreMentoringApp.WebSite.Controllers
     public class ProductController : Controller
     {
 
-        private readonly NorthwindDbContext _dbContext;
+        private readonly IDataRepository _dataRepository;
 
         private readonly ProductViewOptions _productViewOptions;
 
-        private ILogger<ProductController> _logger;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(NorthwindDbContext northwindDbContext, IOptionsSnapshot<ProductViewOptions> productViewOptions, ILogger<ProductController> logger)
+        private readonly IMapper _mapper;
+
+        public ProductController(IDataRepository dataRepository, 
+            IOptionsSnapshot<ProductViewOptions> productViewOptions, 
+            ILogger<ProductController> logger,
+            IMapper mapper)
         {
-            _dbContext = northwindDbContext;
+            _dataRepository = dataRepository;
             _productViewOptions = productViewOptions.Value;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
         {
             _logger.LogInformation(LogEvents.ListItems, "Get list of products.");
-            var products = _dbContext.Products.AsQueryable();
-            if (_productViewOptions.Amount != 0)
-            {
-                products = products.Take(_productViewOptions.Amount);
-            }
-            
-            return View(products
-                .Include(p => p.Category)
-                .Include(p => p.Supplier));
+            return View(_dataRepository.GetProducts(_productViewOptions.Amount));
         }
 
         [HttpGet]
@@ -47,23 +44,25 @@ namespace CoreMentoringApp.WebSite.Controllers
         {
             _logger.LogInformation(LogEvents.InsertItem, "Create new product.");
             PopulateDropDownLists();
-            return View(new Product());
+            return View(new ProductViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("CategoryId,SupplierId,ProductName,QuantityPerUnit,UnitPrice,UnitsInStock,UnitsOnOrder,ReorderLevel,Discontinued")]Product product)
+        public IActionResult Create(ProductViewModel productViewModel)
         {
             if (!ModelState.IsValid)
             {
-                PopulateDropDownLists(product.CategoryId, product.SupplierId);
-                return View(product);
+                PopulateDropDownLists(productViewModel.CategoryId, productViewModel.SupplierId);
+                return View(productViewModel);
             }
-            
-            _dbContext.Products.Add(product);
-            _dbContext.SaveChanges();
-            _logger.LogInformation(LogEvents.InsertItem, "{product} saved to database.", product);
 
+            var product = _mapper.Map<Product>(productViewModel);
+
+            product = _dataRepository.CreateProduct(product);
+            _dataRepository.Commit();
+
+            _logger.LogInformation(LogEvents.InsertItem, "{product} saved to database.", product);
             return RedirectToAction("Details", "Product",
                 new
                 {
@@ -74,14 +73,8 @@ namespace CoreMentoringApp.WebSite.Controllers
         public IActionResult Details(int id)
         {
             _logger.LogInformation(LogEvents.GetItem, "Get product by id={id}", id);
-            if (id == 13)
-            {
-                throw new ArgumentException("Admin doesn't like this number.");
-            }
-            var product = _dbContext.Products
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .FirstOrDefault(p => p.ProductId == id);
+
+            var product = _dataRepository.GetProductById(id);
 
             if (product == null)
             {
@@ -89,64 +82,38 @@ namespace CoreMentoringApp.WebSite.Controllers
                 return NotFound();
             }
 
-            return View(product);
+            return View(_mapper.Map<ProductViewModel>(product));
         }
 
         [HttpGet]
         public IActionResult Edit(int id)
         {
             _logger.LogInformation(LogEvents.UpdateItem, "Update product, id={id}", id);
-            var product = _dbContext.Products.Find(id);
+            var product = _dataRepository.GetProductById(id);
             if (product == null)
             {
                 _logger.LogWarning(LogEvents.UpdateItemNotFound, "Product with {id} was not found.", id);
                 return NotFound();
             }
             PopulateDropDownLists(product.CategoryId, product.SupplierId);
-            return View(product);
+            return View(_mapper.Map<ProductViewModel>(product));
         }
 
-        [HttpPost, ActionName("Edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id)
+        public IActionResult Edit(ProductViewModel productViewModel)
         {
-            if (id == null)
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(LogEvents.UpdateItemNotFound, "Product with {id} was not found.", id);
-                return NotFound();
+                PopulateDropDownLists(productViewModel.CategoryId, productViewModel.SupplierId);
+                return View(productViewModel);
             }
-            
-            var productToUpdate = _dbContext.Products
-                .Include(p => p.Supplier)
-                .Include(p => p.Category)
-                .FirstOrDefault(p => p.ProductId == id);
-            if (await TryUpdateModelAsync<Product>(
-                productToUpdate,
-                "",
-                p => p.CategoryId, 
-                p => p.SupplierId, 
-                p => p.ProductName, 
-                p => p.QuantityPerUnit, 
-                p => p.UnitPrice, 
-                p => p.UnitsInStock, 
-                p => p.UnitsOnOrder, 
-                p => p.ReorderLevel, 
-                p => p.Discontinued))
-            {
-                try
-                {
-                    _dbContext.SaveChanges();
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateException ex)
-                {
-                    string msg = "Unable to save changes.";
-                    _logger.LogError(ex, msg);
-                    ModelState.AddModelError("", msg);
-                }
-            }
-            PopulateDropDownLists(productToUpdate?.CategoryId, productToUpdate?.SupplierId);
-            return View(productToUpdate);
+
+            var product = _mapper.Map<Product>(productViewModel);
+            _dataRepository.UpdateProduct(product);
+            _dataRepository.Commit();
+
+            return RedirectToAction(nameof(Index));
         }
 
         private void PopulateDropDownLists(object categoryId = null, object supplierId = null)
@@ -157,12 +124,12 @@ namespace CoreMentoringApp.WebSite.Controllers
 
         private void PopulateSuppliersDropDownList(object supplierId = null)
         {
-            ViewBag.SupplierId = new SelectList(_dbContext.Suppliers.AsNoTracking(), "SupplierId", "CompanyName", supplierId);
+            ViewBag.SupplierId = new SelectList(_dataRepository.GetSuppliers(), "SupplierId", "CompanyName", supplierId);
         }
 
         private void PopulateCategoriesDropDownList(object categoryId = null)
         {
-            ViewBag.CategoryId = new SelectList(_dbContext.Categories.AsNoTracking(), "CategoryId", "CategoryName", categoryId);
+            ViewBag.CategoryId = new SelectList(_dataRepository.GetCategories(), "CategoryId", "CategoryName", categoryId);
         }
 
     }

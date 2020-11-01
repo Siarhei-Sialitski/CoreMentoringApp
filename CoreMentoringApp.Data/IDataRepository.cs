@@ -5,9 +5,18 @@ namespace CoreMentoringApp.Data
 {
     public interface IDataRepository
     {
+
+        #region Categories
+
         IEnumerable<Category> GetCategories();
 
-        IEnumerable<Supplier> GetSuppliers();
+        Category GetCategoryById(int id);
+
+        Category UpdateCategory(Category category);
+
+        #endregion
+
+        #region Products
 
         IEnumerable<Product> GetProducts(int count = 0);
 
@@ -16,6 +25,14 @@ namespace CoreMentoringApp.Data
         Product GetProductById(int id);
 
         Product UpdateProduct(Product product);
+
+        #endregion
+
+        #region Suppliers
+
+        IEnumerable<Supplier> GetSuppliers();
+
+        #endregion
 
         int Commit();
         

@@ -1,0 +1,25 @@
+﻿@model CoreMentoringApp.WebSite.ViewModels.UploadCategoryImageViewModel
+
+@{
+    ViewData["Title"] = "Upload image";
+}
+
+<form enctype="multipart/form-data" method="post" asp-action="UploadImage">
+    <dl>
+        <dt>
+            <input type="hidden" asp-for="CategoryId" />
+        </dt>
+        <dt>
+            <label>@Model.CategoryName</label>
+        </dt>
+        <dt>
+            <label asp-for="@Model.ImageFile"></label>
+        </dt>
+        <dd>
+            <input asp-for="@Model.ImageFile" type="file">
+            <span asp-validation-for="@Model.ImageFile"></span>
+        </dd>
+    </dl>
+    <input class="btn btn-primary" type="submit" value="Upload" />
+</form>
+

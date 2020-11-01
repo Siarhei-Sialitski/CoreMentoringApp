@@ -7,11 +7,11 @@ namespace CoreMentoringApp.Data
     public class InMemoryDataRepository : IDataRepository
     {
 
-        private List<Category> _categories;
+        private readonly List<Category> _categories;
 
-        private List<Product> _products;
+        private readonly List<Product> _products;
 
-        private List<Supplier> _suppliers;
+        private readonly List<Supplier> _suppliers;
 
         public InMemoryDataRepository()
         {
@@ -21,12 +21,12 @@ namespace CoreMentoringApp.Data
                 new Product {ProductId = 2, ProductName = "Chang", SupplierId = 2, CategoryId = 1, QuantityPerUnit = "24 - 12 oz bottles", UnitPrice = new decimal(19.00), UnitsInStock = 17, UnitsOnOrder = 40, ReorderLevel = 25, Discontinued = false},
                 new Product {ProductId = 3, ProductName = "Aniseed Syrup", SupplierId = 2, CategoryId = 2, QuantityPerUnit = "12 - 550 ml bottles", UnitPrice = new decimal(10.00), UnitsInStock = 13, UnitsOnOrder = 70, ReorderLevel = 25, Discontinued = true}
             };
-
+            
             _categories = new List<Category>
             {
-                new Category {CategoryId = 1, CategoryName = "Beverages", Description = "Soft drinks, coffees, teas, beers, and ales"},
-                new Category {CategoryId = 2, CategoryName = "Condiments", Description = "Sweet and savory sauces, relishes, spreads, and seasonings"},
-                new Category {CategoryId = 3, CategoryName = "Confections", Description = "Desserts, candies, and sweet breads"}
+                new Category {CategoryId = 1, CategoryName = "Beverages", Description = "Soft drinks, coffees, teas, beers, and ales", Picture = new byte[0]},
+                new Category {CategoryId = 2, CategoryName = "Condiments", Description = "Sweet and savory sauces, relishes, spreads, and seasonings", Picture = new byte[0]},
+                new Category {CategoryId = 3, CategoryName = "Confections", Description = "Desserts, candies, and sweet breads", Picture = new byte[0]}
             };
 
             _suppliers = new List<Supplier>
@@ -38,15 +38,34 @@ namespace CoreMentoringApp.Data
             BindRelatedEntities();
         }
 
+        #region Categories
+
         public IEnumerable<Category> GetCategories()
         {
             return _categories;
         }
 
-        public IEnumerable<Supplier> GetSuppliers()
+        public Category UpdateCategory(Category category)
         {
-            return _suppliers;
+            var categoryUpd = _categories.FirstOrDefault(c => c.CategoryId == category.CategoryId);
+            if (categoryUpd != null)
+            {
+                categoryUpd.Picture = category.Picture;
+                categoryUpd.CategoryName = category.CategoryName;
+                categoryUpd.Description = category.Description;
+            }
+
+            return categoryUpd;
         }
+
+        public Category GetCategoryById(int id)
+        {
+            return _categories.FirstOrDefault(c => c.CategoryId == id);
+        }
+
+        #endregion
+
+        #region Products
 
         public IEnumerable<Product> GetProducts(int count = 0)
         {
@@ -92,6 +111,17 @@ namespace CoreMentoringApp.Data
             return productUpd;
         }
 
+        #endregion
+
+        #region Suppliers
+
+        public IEnumerable<Supplier> GetSuppliers()
+        {
+            return _suppliers;
+        }
+
+        #endregion
+
         public int Commit()
         {
             return 0;
@@ -110,6 +140,6 @@ namespace CoreMentoringApp.Data
                 category.Products = new List<Product>(_products.Where(p => p.CategoryId == category.CategoryId));
             }
         }
-
+        
     }
 }

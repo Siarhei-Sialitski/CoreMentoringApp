@@ -16,15 +16,30 @@ namespace CoreMentoringApp.Data
             _dbContext = dbContext;
         }
 
+        #region Categories
+
         public IEnumerable<Category> GetCategories()
         {
             return _dbContext.Categories;
         }
 
-        public IEnumerable<Supplier> GetSuppliers()
+        public Category UpdateCategory(Category category)
         {
-            return _dbContext.Suppliers;
+            var entity = _dbContext.Categories.Attach(category);
+            entity.State = EntityState.Modified;
+            return category;
         }
+
+        public Category GetCategoryById(int id)
+        {
+            return _dbContext.Categories
+                .Include(c => c.Products)
+                .FirstOrDefault(c => c.CategoryId == id);
+        }
+
+        #endregion
+
+        #region Products
 
         public IEnumerable<Product> GetProducts(int count = 0)
         {
@@ -55,14 +70,26 @@ namespace CoreMentoringApp.Data
 
         public Product UpdateProduct(Product product)
         {
-            var entity = _dbContext.Products.Attach(product); 
+            var entity = _dbContext.Products.Attach(product);
             entity.State = EntityState.Modified;
             return product;
         }
+
+        #endregion
+
+        #region Suppliers
+
+        public IEnumerable<Supplier> GetSuppliers()
+        {
+            return _dbContext.Suppliers;
+        }
+
+        #endregion
 
         public int Commit()
         {
             return _dbContext.SaveChanges();
         }
+        
     }
 }

@@ -10,6 +10,17 @@
 <ul>
     @foreach (var item in Model)
     {
-        <li>@Html.DisplayFor(modelItem => item.CategoryName)</li>
+    <li>
+        <div>
+            @Html.DisplayFor(modelItem => item.CategoryName)
+        </div>
+        <div>
+            <a asp-action="Image" asp-route-id="@item.CategoryId">Image</a>
+        </div>
+        <div>
+            <a asp-action="UploadImage" asp-route-id="@item.CategoryId">Change image</a>
+        </div>
+            
+</li>
     }
 </ul>

@@ -60,6 +60,21 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
+        public void Image_ReturnsNotFoundResult_GivenNotExistedCategoryId()
+        {
+            int categoryIdTest = 1;
+            _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
+                .Returns(() => null)
+                .Verifiable();
+            var controller = new CategoryController(_mockDataRepository.Object);
+
+            var result = controller.Image(categoryIdTest);
+
+            Assert.IsType<NotFoundResult>(result);
+            _mockDataRepository.Verify();
+        }
+
+        [Fact]
         public void UploadImage_ReturnsViewWithUpload()
         {
             int categoryIdTest = 1;

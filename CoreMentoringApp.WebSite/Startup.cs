@@ -63,8 +63,10 @@ namespace CoreMentoringApp.WebSite
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    name: "images",
+                    pattern: "images/{id}",
+                    defaults: new {controller = "Category", action = "Image"});
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }

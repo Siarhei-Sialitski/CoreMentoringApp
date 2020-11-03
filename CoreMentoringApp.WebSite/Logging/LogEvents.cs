@@ -12,5 +12,10 @@
         public const int UpdateItemNotFound = 4001;
 
         public const int UnhandledException = 5000;
+        public const int HandledException = 5001;
+
+        public const int SaveItemToCache = 6001;
+        public const int GetItemFromCache = 6002;
+        public const int RemoveItemFromCache = 6003;
     }
 }

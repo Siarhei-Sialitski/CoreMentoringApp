@@ -1,5 +1,7 @@
 using AutoMapper;
 using CoreMentoringApp.Data;
+using CoreMentoringApp.WebSite.Cache;
+using CoreMentoringApp.WebSite.Middlewares;
 using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
 using CoreMentoringApp.WebSite.Profiles;
@@ -37,8 +39,14 @@ namespace CoreMentoringApp.WebSite
             services.AddOptions<ProductViewOptions>()
                 .Bind(_configuration.GetSection(ProductViewOptions.ProductView))
                 .ValidateDataAnnotations();
+            services.AddOptions<CacheOptions>()
+                .Bind(_configuration.GetSection(CacheOptions.Cache))
+                .ValidateDataAnnotations();
 
             services.AddAutoMapper(typeof(AutoMapperProfile));
+
+            services.AddSingleton<OptionsConfigurableMemoryCache>();
+            services.AddTransient<IStreamMemoryCacheWorker, LocalFileStreamMemoryCacheWorker>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -60,6 +68,7 @@ namespace CoreMentoringApp.WebSite
 
             app.UseAuthorization();
 
+            app.UseCacheMiddleware();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
-using CoreMentoringApp.WebSite.Logging;
+using CoreMentoringApp.WebSite.Filters;
 using CoreMentoringApp.WebSite.Options;
 using CoreMentoringApp.WebSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CoreMentoringApp.WebSite.Controllers
@@ -17,38 +16,35 @@ namespace CoreMentoringApp.WebSite.Controllers
         private readonly IDataRepository _dataRepository;
 
         private readonly ProductViewOptions _productViewOptions;
-
-        private readonly ILogger<ProductController> _logger;
-
+        
         private readonly IMapper _mapper;
 
         public ProductController(IDataRepository dataRepository, 
             IOptionsSnapshot<ProductViewOptions> productViewOptions, 
-            ILogger<ProductController> logger,
             IMapper mapper)
         {
             _dataRepository = dataRepository;
             _productViewOptions = productViewOptions.Value;
-            _logger = logger;
             _mapper = mapper;
         }
 
+        [CustomizedLoggingActionFilter]
         public IActionResult Index()
         {
-            _logger.LogInformation(LogEvents.ListItems, "Get list of products.");
             return View(_dataRepository.GetProducts(_productViewOptions.Amount));
         }
 
         [HttpGet]
+        [CustomizedLoggingActionFilter]
         public IActionResult Create()
         {
-            _logger.LogInformation(LogEvents.InsertItem, "Create new product.");
             PopulateDropDownLists();
             return View(new ProductViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomizedLoggingActionFilter]
         public IActionResult Create(ProductViewModel productViewModel)
         {
             if (!ModelState.IsValid)
@@ -62,7 +58,6 @@ namespace CoreMentoringApp.WebSite.Controllers
             product = _dataRepository.CreateProduct(product);
             _dataRepository.Commit();
 
-            _logger.LogInformation(LogEvents.InsertItem, "{product} saved to database.", product);
             return RedirectToAction("Details", "Product",
                 new
                 {
@@ -70,15 +65,13 @@ namespace CoreMentoringApp.WebSite.Controllers
                 });
         }
 
+        [CustomizedLoggingActionFilter]
         public IActionResult Details(int id)
         {
-            _logger.LogInformation(LogEvents.GetItem, "Get product by id={id}", id);
-
             var product = _dataRepository.GetProductById(id);
 
             if (product == null)
             {
-                _logger.LogWarning(LogEvents.GetItemNotFound, "Product with {id} was not found.", id);
                 return NotFound();
             }
 
@@ -86,13 +79,12 @@ namespace CoreMentoringApp.WebSite.Controllers
         }
 
         [HttpGet]
+        [CustomizedLoggingActionFilter]
         public IActionResult Edit(int id)
         {
-            _logger.LogInformation(LogEvents.UpdateItem, "Update product, id={id}", id);
             var product = _dataRepository.GetProductById(id);
             if (product == null)
             {
-                _logger.LogWarning(LogEvents.UpdateItemNotFound, "Product with {id} was not found.", id);
                 return NotFound();
             }
             PopulateDropDownLists(product.CategoryId, product.SupplierId);
@@ -101,6 +93,7 @@ namespace CoreMentoringApp.WebSite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomizedLoggingActionFilter]
         public IActionResult Edit(ProductViewModel productViewModel)
         {
             if (!ModelState.IsValid)

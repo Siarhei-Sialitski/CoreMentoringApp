@@ -1,6 +1,7 @@
 using AutoMapper;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Cache;
+using CoreMentoringApp.WebSite.Filters.CustomActionLogger;
 using CoreMentoringApp.WebSite.Middlewares;
 using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
@@ -42,11 +43,15 @@ namespace CoreMentoringApp.WebSite
             services.AddOptions<CacheOptions>()
                 .Bind(_configuration.GetSection(CacheOptions.Cache))
                 .ValidateDataAnnotations();
+            services.AddOptions<ActionsLoggingOptions>()
+                .Bind(_configuration.GetSection(ActionsLoggingOptions.ActionsLogging))
+                .ValidateDataAnnotations();
 
             services.AddAutoMapper(typeof(AutoMapperProfile));
 
             services.AddSingleton<OptionsConfigurableMemoryCache>();
             services.AddTransient<IStreamMemoryCacheWorker, LocalFileStreamMemoryCacheWorker>();
+            services.AddScoped<ICustomActionLogger, CustomActionLogger>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

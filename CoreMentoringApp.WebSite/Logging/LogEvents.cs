@@ -17,5 +17,8 @@
         public const int SaveItemToCache = 6001;
         public const int GetItemFromCache = 6002;
         public const int RemoveItemFromCache = 6003;
+
+        public const int ActionExecuting = 7000;
+        public const int ActionExecuted = 7001;
     }
 }

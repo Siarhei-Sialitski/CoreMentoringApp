@@ -13,7 +13,7 @@ namespace CoreMentoringApp.WebSite.Cache
     public class LocalFileStreamMemoryCacheWorker : IStreamMemoryCacheWorker
     {
         private readonly ILogger<LocalFileStreamMemoryCacheWorker> _logger;
-        private readonly IOptions<CacheOptions> _cacheOptions;
+        private readonly CacheOptions _cacheOptions;
         private readonly MemoryCache _memoryCache;
 
         public LocalFileStreamMemoryCacheWorker(ILogger<LocalFileStreamMemoryCacheWorker> logger,
@@ -21,7 +21,7 @@ namespace CoreMentoringApp.WebSite.Cache
             IOptions<CacheOptions> cacheOptions)
         {
             _logger = logger;
-            _cacheOptions = cacheOptions;
+            _cacheOptions = cacheOptions.Value;
             _memoryCache = optionsConfigurableMemoryCache.Cache;
         }
 
@@ -34,7 +34,7 @@ namespace CoreMentoringApp.WebSite.Cache
                 if (cacheItem != null)
                 {
                     string cacheFilePath = cacheItem.FilePath;
-                    cacheItem.CancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_cacheOptions.Value.Expiration));
+                    cacheItem.CancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_cacheOptions.Expiration));
                     _logger.LogInformation(LogEvents.GetItemFromCache, "Loading {key} stream from file {cacheFilePath}", key, cacheFilePath);
                     return File.OpenRead(cacheFilePath);
                 }
@@ -45,15 +45,15 @@ namespace CoreMentoringApp.WebSite.Cache
 
         public void SetStreamMemoryCacheValue(object key, Stream stream)
         {
-            _memoryCache.Compact((double)1 / _cacheOptions.Value.MaxCount);
+            _memoryCache.Compact((double)1 / _cacheOptions.MaxCount);
 
             var cacheFilePath = WriteToFile(key, stream);
 
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_cacheOptions.Value.Expiration));
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_cacheOptions.Expiration));
             var cacheEntryOptions = new MemoryCacheEntryOptions 
                 {
                     Size = 1,
-                    SlidingExpiration = TimeSpan.FromSeconds(_cacheOptions.Value.Expiration),
+                    SlidingExpiration = TimeSpan.FromSeconds(_cacheOptions.Expiration),
                     ExpirationTokens = { new CancellationChangeToken(cts.Token) }
                 }
                 .RegisterPostEvictionCallback(ClearCache);
@@ -62,7 +62,7 @@ namespace CoreMentoringApp.WebSite.Cache
 
         private string WriteToFile(object key, Stream stream)
         {
-            string cacheFilePath = Path.Combine(Environment.ExpandEnvironmentVariables(_cacheOptions.Value.Path),Path.GetRandomFileName());
+            string cacheFilePath = Path.Combine(Environment.ExpandEnvironmentVariables(_cacheOptions.Path),Path.GetRandomFileName());
             stream.Seek(0, SeekOrigin.Begin);
             using (Stream file = File.Create(cacheFilePath))
             {

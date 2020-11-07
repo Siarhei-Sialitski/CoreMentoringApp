@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace CoreMentoringApp.WebSite.Models.Validators
+namespace CoreMentoringApp.WebSite.ViewModels.Validators
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class MinimumValueAttribute : ValidationAttribute, IClientModelValidator

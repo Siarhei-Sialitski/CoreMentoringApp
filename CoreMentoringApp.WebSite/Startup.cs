@@ -1,5 +1,11 @@
+using AutoMapper;
+using CoreMentoringApp.Data;
+using CoreMentoringApp.WebSite.Cache;
+using CoreMentoringApp.WebSite.Filters.CustomActionLogger;
+using CoreMentoringApp.WebSite.Middlewares;
 using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
+using CoreMentoringApp.WebSite.Profiles;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +35,23 @@ namespace CoreMentoringApp.WebSite
                 options.UseSqlServer(connectionString);
             });
 
+            services.AddScoped<IDataRepository, SqlDataRepository>();
+
             services.AddOptions<ProductViewOptions>()
                 .Bind(_configuration.GetSection(ProductViewOptions.ProductView))
                 .ValidateDataAnnotations();
+            services.AddOptions<CacheOptions>()
+                .Bind(_configuration.GetSection(CacheOptions.Cache))
+                .ValidateDataAnnotations();
+            services.AddOptions<ActionsLoggingOptions>()
+                .Bind(_configuration.GetSection(ActionsLoggingOptions.ActionsLogging))
+                .ValidateDataAnnotations();
+
+            services.AddAutoMapper(typeof(AutoMapperProfile));
+
+            services.AddSingleton<OptionsConfigurableMemoryCache>();
+            services.AddTransient<IStreamMemoryCacheWorker, LocalFileStreamMemoryCacheWorker>();
+            services.AddScoped<ICustomActionLogger, CustomActionLogger>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -53,11 +73,14 @@ namespace CoreMentoringApp.WebSite
 
             app.UseAuthorization();
 
+            app.UseCacheMiddleware();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    name: "images",
+                    pattern: "images/{id}",
+                    defaults: new {controller = "Category", action = "Image"});
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }

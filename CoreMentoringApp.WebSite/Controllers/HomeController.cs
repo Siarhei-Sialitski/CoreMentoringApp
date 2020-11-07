@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using CoreMentoringApp.WebSite.Logging;
-using CoreMentoringApp.WebSite.Models;
+using CoreMentoringApp.WebSite.ViewModels;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,6 @@ namespace CoreMentoringApp.WebSite.Controllers
         public IActionResult Error()
         {
             var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-            
 
             var message = "Please, see log file to find additional information. Use Request ID to enhance your research.";
 

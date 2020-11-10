@@ -10,17 +10,26 @@
 <ul>
     @foreach (var item in Model)
     {
-    <li>
-        <div>
-            @Html.DisplayFor(modelItem => item.CategoryName)
-        </div>
-        <div>
-            <a asp-action="Image" asp-route-id="@item.CategoryId">Image</a>
-        </div>
-        <div>
-            <a asp-action="UploadImage" asp-route-id="@item.CategoryId">Change image</a>
-        </div>
-            
-</li>
+        <li>
+            <div>
+                @Html.DisplayFor(modelItem => item.CategoryName)
+            </div>
+            <div>
+                <a asp-action="Image" asp-route-id="@item.CategoryId">Image</a>
+            </div>
+            <div>
+                <a asp-action="UploadImage" asp-route-id="@item.CategoryId">Change image</a>
+            </div>
+
+        </li>
     }
 </ul>
+
+@section Footers
+{
+    <footer class="border-top footer">
+        <div class="alert-danger border-top footer">
+            <h5>You are not allowed to edit categories.</h5>
+        </div>
+    </footer>
+}

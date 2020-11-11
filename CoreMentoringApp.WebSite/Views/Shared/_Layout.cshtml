@@ -39,7 +39,20 @@
             </nav>
         </header>
     }
+
+@if (IsSectionDefined("Breadcrumbs"))
+{
+    @(await RenderSectionAsync("Breadcrumbs", false))
+}
+else
+{
     <div class="container">
+        <vc:breadcrumbs context="@ViewContext">
+        </vc:breadcrumbs>
+    </div>
+}
+
+<div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

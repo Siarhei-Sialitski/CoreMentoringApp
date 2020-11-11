@@ -69,7 +69,7 @@ namespace CoreMentoringApp.WebSite.Cache
                 stream.CopyTo(file);
             }
 
-            _logger.LogInformation(LogEvents.SaveItemToCache,"Stream {key} saved to into file {cacheFilePath}",key, cacheFilePath);
+            _logger.LogInformation(LogEvents.SaveItemToCache,"Stream {key} saved to file {cacheFilePath}",key, cacheFilePath);
             return cacheFilePath;
         }
 

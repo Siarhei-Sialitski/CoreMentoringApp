@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoreMentoringApp.WebSite.Controllers
 {
-    public class CategoryController : Controller
+    public class CategoriesController : Controller
     {
 
         private readonly IDataRepository _dataRepository;
 
-        public CategoryController(IDataRepository dataRepository)
+        public CategoriesController(IDataRepository dataRepository)
         {
             _dataRepository = dataRepository;
         }

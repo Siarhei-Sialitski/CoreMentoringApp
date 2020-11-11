@@ -13,7 +13,7 @@ using Xunit;
 
 namespace CoreMentoringApp.WebSite.Tests.Controllers
 {
-    public class ProductControllerTests
+    public class ProductsControllerTests
     {
         private readonly Mock<IDataRepository> _mockDataRepository;
 
@@ -22,7 +22,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         private readonly Mock<IMapper> _mockMapper;
 
 
-        public ProductControllerTests()
+        public ProductsControllerTests()
         {
             _mockDataRepository = new Mock<IDataRepository>();
             _mockOptions = new Mock<IOptionsSnapshot<ProductViewOptions>>();
@@ -39,7 +39,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockOptions.Setup(opt => opt.Value)
                 .Returns(GetProductViewOptions())
                 .Verifiable();
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Index();
 
@@ -53,7 +53,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         [Fact]
         public void Create_ReturnsViewWithProductViewModel()
         {
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Create();
 
@@ -79,12 +79,12 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(m => m.Commit())
                 .Verifiable();
             
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Create(productViewModel);
 
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Product", redirectToActionResult.ControllerName);
+            Assert.Equal("Products", redirectToActionResult.ControllerName);
             Assert.Equal("Details", redirectToActionResult.ActionName);
             Assert.Equal(productIdTest, redirectToActionResult.RouteValues["id"]);
             _mockMapper.Verify();
@@ -102,7 +102,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockMapper.Setup(m => m.Map<ProductViewModel>(product))
                 .Returns(productViewModel)
                 .Verifiable();
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Details(productId);
 
@@ -117,7 +117,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             int productId = 7;
             _mockDataRepository.Setup(m => m.GetProductById(productId))
                 .Verifiable();
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Details(productId);
 
@@ -142,7 +142,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockMapper.Setup(m => m.Map<ProductViewModel>(product))
                 .Returns(productViewModel)
                 .Verifiable();
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Edit(productIdTest);
 
@@ -168,7 +168,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(m => m.Commit())
                 .Verifiable();
 
-            var controller = new ProductController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
+            var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
             var result = controller.Edit(productViewModel);
 

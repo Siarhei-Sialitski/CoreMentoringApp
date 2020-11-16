@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace CoreMentoringApp.WebSite.Controllers
 {
-    public class ProductController : Controller
+    public class ProductsController : Controller
     {
 
         private readonly IDataRepository _dataRepository;
@@ -19,7 +19,7 @@ namespace CoreMentoringApp.WebSite.Controllers
         
         private readonly IMapper _mapper;
 
-        public ProductController(IDataRepository dataRepository, 
+        public ProductsController(IDataRepository dataRepository, 
             IOptionsSnapshot<ProductViewOptions> productViewOptions, 
             IMapper mapper)
         {
@@ -58,7 +58,7 @@ namespace CoreMentoringApp.WebSite.Controllers
             product = _dataRepository.CreateProduct(product);
             _dataRepository.Commit();
 
-            return RedirectToAction("Details", "Product",
+            return RedirectToAction("Details", "Products",
                 new
                 {
                     id = product.ProductId

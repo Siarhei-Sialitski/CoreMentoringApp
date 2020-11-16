@@ -1,5 +1,6 @@
 using AutoMapper;
 using CoreMentoringApp.Data;
+using CoreMentoringApp.WebSite.Breadcrumbs;
 using CoreMentoringApp.WebSite.Cache;
 using CoreMentoringApp.WebSite.Filters.CustomActionLogger;
 using CoreMentoringApp.WebSite.Middlewares;
@@ -27,15 +28,18 @@ namespace CoreMentoringApp.WebSite
         
         public void ConfigureServices(IServiceCollection services)
         {
+            #region Built-in
             services.AddControllersWithViews();
-
             services.AddDbContext<NorthwindDbContext>(options =>
             {
                 var connectionString = _configuration.GetConnectionString("NorthwindDataContext");
                 options.UseSqlServer(connectionString);
             });
+            services.AddAutoMapper(typeof(AutoMapperProfile));
 
-            services.AddScoped<IDataRepository, SqlDataRepository>();
+            #endregion
+
+            #region Options
 
             services.AddOptions<ProductViewOptions>()
                 .Bind(_configuration.GetSection(ProductViewOptions.ProductView))
@@ -47,11 +51,27 @@ namespace CoreMentoringApp.WebSite
                 .Bind(_configuration.GetSection(ActionsLoggingOptions.ActionsLogging))
                 .ValidateDataAnnotations();
 
-            services.AddAutoMapper(typeof(AutoMapperProfile));
+            #endregion
+
+            #region Singleton
 
             services.AddSingleton<OptionsConfigurableMemoryCache>();
-            services.AddTransient<IStreamMemoryCacheWorker, LocalFileStreamMemoryCacheWorker>();
+
+            #endregion
+
+            #region Scoped
+
+            services.AddScoped<IDataRepository, SqlDataRepository>();
             services.AddScoped<ICustomActionLogger, CustomActionLogger>();
+
+            #endregion
+
+            #region Transient
+
+            services.AddTransient<IStreamMemoryCacheWorker, LocalFileStreamMemoryCacheWorker>();
+            services.AddTransient<IBreadcrumbsProvider, BreadcrumbsProvider>();
+
+            #endregion
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -79,7 +99,7 @@ namespace CoreMentoringApp.WebSite
                 endpoints.MapControllerRoute(
                     name: "images",
                     pattern: "images/{id}",
-                    defaults: new {controller = "Category", action = "Image"});
+                    defaults: new {controller = "Categories", action = "Image"});
                 endpoints.MapDefaultControllerRoute();
             });
         }

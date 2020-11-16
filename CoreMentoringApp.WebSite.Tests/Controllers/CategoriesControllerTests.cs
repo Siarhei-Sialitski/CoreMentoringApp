@@ -11,12 +11,12 @@ using Xunit;
 
 namespace CoreMentoringApp.WebSite.Tests.Controllers
 {
-    public class CategoryControllerTests
+    public class CategoriesControllerTests
     {
 
         private readonly Mock<IDataRepository> _mockDataRepository;
 
-        public CategoryControllerTests()
+        public CategoriesControllerTests()
         {
             _mockDataRepository = new Mock<IDataRepository>();
         }
@@ -27,7 +27,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(repo => repo.GetCategories())
                 .Returns(GetTestCategories)
                 .Verifiable();
-            var controller = new CategoryController(_mockDataRepository.Object);
+            var controller = new CategoriesController(_mockDataRepository.Object);
 
             var result = controller.Index();
 
@@ -50,7 +50,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
                 .Returns(category)
                 .Verifiable();
-            var controller = new CategoryController(_mockDataRepository.Object);
+            var controller = new CategoriesController(_mockDataRepository.Object);
 
             var result = controller.Image(categoryIdTest);
 
@@ -66,7 +66,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
                 .Returns(() => null)
                 .Verifiable();
-            var controller = new CategoryController(_mockDataRepository.Object);
+            var controller = new CategoriesController(_mockDataRepository.Object);
 
             var result = controller.Image(categoryIdTest);
 
@@ -88,7 +88,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
                 .Returns(category)
                 .Verifiable();
-            var controller = new CategoryController(_mockDataRepository.Object);
+            var controller = new CategoriesController(_mockDataRepository.Object);
 
             var result = controller.UploadImage(categoryIdTest);
 
@@ -121,7 +121,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
                 .Verifiable();
             _mockDataRepository.Setup(m => m.Commit())
                 .Verifiable();
-            var controller = new CategoryController(_mockDataRepository.Object);
+            var controller = new CategoriesController(_mockDataRepository.Object);
 
             var result = controller.UploadImage(categoryViewModel);
 

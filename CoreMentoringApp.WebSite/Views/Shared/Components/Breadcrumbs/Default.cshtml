@@ -1,0 +1,23 @@
+﻿@model List<CoreMentoringApp.WebSite.Breadcrumbs.BreadcrumbItem>
+@{
+    if (Model.Count > 0)
+    {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                @foreach (var item in Model)
+                {
+                    if (!item.IsActive)
+                    {
+                        <li class="breadcrumb-item" id="ovr">
+                            <a asp-controller="@item.Controller" asp-action="@item.Action">@item.Title</a>
+                        </li> 
+                    }
+                    else
+                    {
+                        <li class="breadcrumb-item active" id="ovr" aria-current="page" asp-controller="@item.Controller" asp-action="@item.Action">@item.Title</li>
+                    }
+                }
+            </ol>
+        </nav>
+    }
+}

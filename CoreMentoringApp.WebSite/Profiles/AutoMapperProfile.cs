@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CoreMentoringApp.Core.Models;
+using CoreMentoringApp.WebSite.Areas.Api.Models;
 using CoreMentoringApp.WebSite.ViewModels;
 
 namespace CoreMentoringApp.WebSite.Profiles
@@ -9,6 +10,10 @@ namespace CoreMentoringApp.WebSite.Profiles
         public AutoMapperProfile()
         {
             CreateMap<Product, ProductViewModel>().ReverseMap();
+
+            CreateMap<Product, ProductDTO>();
+
+            CreateMap<Category, CategoryDTO>();
         }
     }
 }

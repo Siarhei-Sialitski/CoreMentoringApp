@@ -20,6 +20,7 @@ namespace CoreMentoringApp.WebSite
     {
 
         private readonly IConfiguration _configuration;
+        private readonly string _coreAppRestApiSpecificOrigins = "_coreAppRestApiSpecificOrigins";
 
         public Startup(IConfiguration configuration)
         {
@@ -36,6 +37,12 @@ namespace CoreMentoringApp.WebSite
                 options.UseSqlServer(connectionString);
             });
             services.AddAutoMapper(typeof(AutoMapperProfile));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: _coreAppRestApiSpecificOrigins,
+                    builder => { builder.WithOrigins("https://localhost:44351"); });
+            });
 
             #endregion
 
@@ -90,6 +97,7 @@ namespace CoreMentoringApp.WebSite
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors(_coreAppRestApiSpecificOrigins);
 
             app.UseAuthorization();
 

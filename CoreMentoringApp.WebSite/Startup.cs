@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace CoreMentoringApp.WebSite
 {
@@ -42,6 +43,11 @@ namespace CoreMentoringApp.WebSite
             {
                 options.AddPolicy(name: _coreAppRestApiSpecificOrigins,
                     builder => { builder.WithOrigins("https://localhost:44351"); });
+            });
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo() {Title = "Core Mentoring App Api", Version = "v1"});
             });
 
             #endregion
@@ -95,6 +101,12 @@ namespace CoreMentoringApp.WebSite
             app.UseStatusCodePages();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Core Mentoring App Api v1");
+            });
 
             app.UseRouting();
             app.UseCors(_coreAppRestApiSpecificOrigins);

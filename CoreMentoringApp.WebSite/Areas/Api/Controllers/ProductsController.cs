@@ -3,6 +3,7 @@ using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Areas.Api.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -11,6 +12,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
     [Area("api")]
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class ProductsController : ControllerBase
     {
         private readonly IDataRepository _repository;
@@ -31,6 +33,8 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ProductDTO> Get(int id)
         {
             var product = _repository.GetProductById(id);
@@ -42,6 +46,8 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
             if (productDto.CategoryId.HasValue)
@@ -75,6 +81,9 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
         {
             var product = _repository.GetProductById(id);
@@ -112,6 +121,9 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ProductDTO> Delete(int id)
         {
             var product = _repository.GetProductById(id);

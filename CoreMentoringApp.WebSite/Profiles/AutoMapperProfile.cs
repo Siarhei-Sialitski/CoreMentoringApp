@@ -11,7 +11,7 @@ namespace CoreMentoringApp.WebSite.Profiles
         {
             CreateMap<Product, ProductViewModel>().ReverseMap();
 
-            CreateMap<Product, ProductDTO>();
+            CreateMap<Product, ProductDTO>().ReverseMap();
 
             CreateMap<Category, CategoryDTO>();
         }

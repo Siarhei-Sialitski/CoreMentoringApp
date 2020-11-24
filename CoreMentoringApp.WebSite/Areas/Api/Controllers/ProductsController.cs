@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
+using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Areas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
 {
@@ -13,11 +15,13 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
     {
         private readonly IDataRepository _repository;
         private readonly IMapper _mapper;
+        private readonly LinkGenerator _linkGenerator;
 
-        public ProductsController(IDataRepository repository, IMapper mapper)
+        public ProductsController(IDataRepository repository, IMapper mapper, LinkGenerator linkGenerator)
         {
             _repository = repository;
             _mapper = mapper;
+            _linkGenerator = linkGenerator;
         }
 
         [HttpGet]
@@ -25,5 +29,105 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         {
             return Ok(_mapper.Map<IEnumerable<ProductDTO>>(_repository.GetProducts()));
         }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<ProductDTO> Get(int id)
+        {
+            var product = _repository.GetProductById(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<ProductDTO>(product));
+        }
+
+        [HttpPost]
+        public ActionResult<ProductDTO> Post(ProductDTO productDto)
+        {
+            if (productDto.CategoryId.HasValue)
+            {
+                var category = _repository.GetCategoryById(productDto.CategoryId.Value);
+                if (category == null)
+                {
+                    return BadRequest("CategoryId is invalid.");
+                }
+            }
+
+            if (productDto.SupplierId.HasValue)
+            {
+                var category = _repository.GetSupplierById(productDto.SupplierId.Value);
+                if (category == null)
+                {
+                    return BadRequest("SupplierId is invalid.");
+                }
+            }
+
+            var product = _mapper.Map<Product>(productDto);
+            _repository.CreateProduct(product);
+            if (_repository.Commit() > 0)
+            {
+                var link = _linkGenerator.GetPathByAction(HttpContext,"Get", "Products",
+                    new {id = product.ProductId});
+                return Created(link, _mapper.Map<ProductDTO>(product));
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPut("{id:int}")]
+        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
+        {
+            var product = _repository.GetProductById(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            if (productDto.CategoryId.HasValue)
+            {
+                var category = _repository.GetCategoryById(productDto.CategoryId.Value);
+                if (category == null)
+                {
+                    return BadRequest("CategoryId is invalid.");
+                }
+            }
+
+            if (productDto.SupplierId.HasValue)
+            {
+                var category = _repository.GetSupplierById(productDto.SupplierId.Value);
+                if (category == null)
+                {
+                    return BadRequest("SupplierId is invalid.");
+                }
+            }
+
+            _mapper.Map(productDto, product);
+
+            if (_repository.Commit() > 0)
+            {
+                return Ok(_mapper.Map<ProductDTO>(product));
+            }
+
+            return BadRequest();
+        }
+
+        [HttpDelete("{id:int}")]
+        public ActionResult<ProductDTO> Delete(int id)
+        {
+            var product = _repository.GetProductById(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            _repository.DeleteProduct(product);
+
+            if (_repository.Commit() > 0)
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
     }
 }

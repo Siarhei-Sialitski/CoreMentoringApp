@@ -111,6 +111,11 @@ namespace CoreMentoringApp.Data
             return productUpd;
         }
 
+        public void DeleteProduct(Product product)
+        {
+            _products.Remove(product);
+        }
+
         #endregion
 
         #region Suppliers
@@ -118,6 +123,11 @@ namespace CoreMentoringApp.Data
         public IEnumerable<Supplier> GetSuppliers()
         {
             return _suppliers;
+        }
+
+        public Supplier GetSupplierById(int id)
+        {
+            return _suppliers.SingleOrDefault(s => s.SupplierId == id);
         }
 
         #endregion

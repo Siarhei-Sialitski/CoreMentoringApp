@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Areas.Api.Models;
@@ -24,6 +25,37 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
             return Ok(_mapper.Map<IEnumerable<CategoryDTO>>(_repository.GetCategories()));
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<CategoryDTO> Get(int id)
+        {
+            var category = _repository.GetCategoryById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<CategoryDTO>(category));
+        }
+
+        [HttpPut("{id:int}/image")]
+        public ActionResult<ProductDTO> Put(int id, [FromBody]ImageDTO imageDto)
+        {
+            var category = _repository.GetCategoryById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            category.Picture = Convert.FromBase64String(imageDto.Image);
+            _repository.UpdateCategory(category);
+
+            if (_repository.Commit() > 0)
+            {
+                return Ok(_mapper.Map<CategoryDTO>(category));
+            }
+
+            return BadRequest();
         }
     }
 }

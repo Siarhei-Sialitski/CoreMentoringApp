@@ -26,11 +26,15 @@ namespace CoreMentoringApp.Data
 
         Product UpdateProduct(Product product);
 
+        void DeleteProduct(Product product);
+
         #endregion
 
         #region Suppliers
 
         IEnumerable<Supplier> GetSuppliers();
+
+        Supplier GetSupplierById(int id);
 
         #endregion
 

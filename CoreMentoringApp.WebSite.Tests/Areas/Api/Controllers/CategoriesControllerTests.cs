@@ -25,7 +25,7 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
         }
 
         [Fact]
-        public void Index_GetReturnsListOfCategoriesDTO()
+        public void Get_ReturnsListOfCategoriesDTO()
         {
             var testCategories = GetTestCategories();
             var testCategoriesDto = GetTestCategoriesDTO();
@@ -47,6 +47,45 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
             _mockMapper.Verify();
         }
 
+        [Fact]
+        public void Get_ReturnsCategoryDTO_WhenIdPassed()
+        {
+            var testCategoryDto = GetTestCategoriesDTO().First();
+            var testCategory = new Category();
+            var id = 1;
+            _mockDataRepository.Setup(repo => repo.GetCategoryById(id))
+                .Returns(testCategory)
+                .Verifiable();
+            _mockMapper.Setup(m => m.Map<CategoryDTO>(testCategory))
+                .Returns(testCategoryDto)
+                .Verifiable();
+            var controller = new CategoriesController(_mockDataRepository.Object, _mockMapper.Object);
+
+            var result = controller.Get(id);
+
+            var actionResult = Assert.IsType<ActionResult<CategoryDTO>>(result);
+            var okObjectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            var model = Assert.IsAssignableFrom<CategoryDTO>(okObjectResult.Value);
+            Assert.Equal(testCategoryDto, model);
+            _mockDataRepository.Verify();
+            _mockMapper.Verify();
+        }
+
+        [Fact]
+        public void Put_ReceivesExistingCategoryFromRepository()
+        {
+            var imageDto = new ImageDTO();
+            int id = 1;
+            _mockDataRepository.Setup(repo => repo.GetCategoryById(id))
+                .Verifiable();
+
+            var controller = new CategoriesController(_mockDataRepository.Object, _mockMapper.Object);
+
+            controller.Put(id, imageDto);
+
+            _mockDataRepository.Verify();
+        }
+
         private List<Category> GetTestCategories()
         {
             return new List<Category>
@@ -56,6 +95,8 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
                 new Category {CategoryId = 3, CategoryName = "Confections", Description = "Desserts, candies, and sweet breads"}
             };
         }
+
+        
 
         private List<CategoryDTO> GetTestCategoriesDTO()
         {

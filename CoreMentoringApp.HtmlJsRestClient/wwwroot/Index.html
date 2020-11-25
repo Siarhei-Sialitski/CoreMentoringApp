@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Core Mentoring Rest Client</title>
+</head>
+<body>
+
+    <div>
+        <h2>Core Mentoring Rest Client</h2>
+        <input type="button" value="Get All Products" onclick="GetItems('products');" />
+        <input type="button" value="Get All Categories" onclick="GetItems('categories');"/>
+    </div>
+    <div>
+        <ul id="items" />
+    </div>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        var uri = 'https://localhost:44346/api/';
+        
+        function GetItems(path) {
+            $('#items').empty();
+            $.getJSON(uri + path)
+                .done(function (data) {
+                    $.each(data, function (key, item) {
+                        console.log(item);
+                        $('<li>', { text: JSON.stringify(item, replacer) }).appendTo($('#items'));
+                    });
+                });
+        }
+
+        function replacer(key, value) {
+            if (key == "picture") return undefined; //hide base 64 from reponse
+            else return value;
+        }
+
+    </script>
+</body>
+</html>

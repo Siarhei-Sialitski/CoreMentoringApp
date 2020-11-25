@@ -1,0 +1,1 @@
+java -jar swagger-codegen-cli-3.0.20.jar generate -i https://localhost:44346/swagger/v1/swagger.json -l csharp -o output -D io.swagger.v3.parser.util.RemoteUrl.trustAll=true

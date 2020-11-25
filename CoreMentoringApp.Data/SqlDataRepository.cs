@@ -65,7 +65,7 @@ namespace CoreMentoringApp.Data
             return _dbContext.Products
                 .Include(p => p.Category)
                 .Include(p => p.Supplier)
-                .FirstOrDefault(p => p.ProductId == id);
+                .SingleOrDefault(p => p.ProductId == id);
         }
 
         public Product UpdateProduct(Product product)
@@ -75,6 +75,11 @@ namespace CoreMentoringApp.Data
             return product;
         }
 
+        public void DeleteProduct(Product product)
+        {
+            _dbContext.Products.Remove(product);
+        }
+
         #endregion
 
         #region Suppliers
@@ -82,6 +87,11 @@ namespace CoreMentoringApp.Data
         public IEnumerable<Supplier> GetSuppliers()
         {
             return _dbContext.Suppliers;
+        }
+
+        public Supplier GetSupplierById(int id)
+        {
+            return _dbContext.Suppliers.SingleOrDefault(s => s.SupplierId == id);
         }
 
         #endregion

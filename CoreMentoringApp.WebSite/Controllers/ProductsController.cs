@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Threading.Tasks;
+using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Filters;
@@ -29,34 +30,34 @@ namespace CoreMentoringApp.WebSite.Controllers
         }
 
         [CustomizedLoggingActionFilter]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_dataRepository.GetProducts(_productViewOptions.Amount));
+            return View(await _dataRepository.GetProductsAsync(_productViewOptions.Amount));
         }
 
         [HttpGet]
         [CustomizedLoggingActionFilter]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateDropDownLists();
+            await PopulateDropDownListsAsync();
             return View(new ProductViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomizedLoggingActionFilter]
-        public IActionResult Create(ProductViewModel productViewModel)
+        public async Task<IActionResult> Create(ProductViewModel productViewModel)
         {
             if (!ModelState.IsValid)
             {
-                PopulateDropDownLists(productViewModel.CategoryId, productViewModel.SupplierId);
+                await PopulateDropDownListsAsync(productViewModel.CategoryId, productViewModel.SupplierId);
                 return View(productViewModel);
             }
 
             var product = _mapper.Map<Product>(productViewModel);
 
-            product = _dataRepository.CreateProduct(product);
-            _dataRepository.Commit();
+            product = await _dataRepository.CreateProductAsync(product);
+            await _dataRepository.CommitAsync();
 
             return RedirectToAction("Details", "Products",
                 new
@@ -66,9 +67,9 @@ namespace CoreMentoringApp.WebSite.Controllers
         }
 
         [CustomizedLoggingActionFilter]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var product = _dataRepository.GetProductById(id);
+            var product = await _dataRepository.GetProductByIdAsync(id);
 
             if (product == null)
             {
@@ -80,49 +81,49 @@ namespace CoreMentoringApp.WebSite.Controllers
 
         [HttpGet]
         [CustomizedLoggingActionFilter]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var product = _dataRepository.GetProductById(id);
+            var product = await _dataRepository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            PopulateDropDownLists(product.CategoryId, product.SupplierId);
+            await PopulateDropDownListsAsync(product.CategoryId, product.SupplierId);
             return View(_mapper.Map<ProductViewModel>(product));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomizedLoggingActionFilter]
-        public IActionResult Edit(ProductViewModel productViewModel)
+        public async Task<IActionResult> Edit(ProductViewModel productViewModel)
         {
             if (!ModelState.IsValid)
             {
-                PopulateDropDownLists(productViewModel.CategoryId, productViewModel.SupplierId);
+                await PopulateDropDownListsAsync(productViewModel.CategoryId, productViewModel.SupplierId);
                 return View(productViewModel);
             }
 
             var product = _mapper.Map<Product>(productViewModel);
-            _dataRepository.UpdateProduct(product);
-            _dataRepository.Commit();
+            await _dataRepository.UpdateProductAsync(product);
+            await _dataRepository.CommitAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-        private void PopulateDropDownLists(object categoryId = null, object supplierId = null)
+        private async Task PopulateDropDownListsAsync(object categoryId = null, object supplierId = null)
         {
-            PopulateCategoriesDropDownList(categoryId);
-            PopulateSuppliersDropDownList(supplierId);
+            await PopulateCategoriesDropDownListAsync(categoryId);
+            await PopulateSuppliersDropDownListAsync(supplierId);
         }
 
-        private void PopulateSuppliersDropDownList(object supplierId = null)
+        private async Task PopulateSuppliersDropDownListAsync(object supplierId = null)
         {
-            ViewBag.SupplierId = new SelectList(_dataRepository.GetSuppliers(), "SupplierId", "CompanyName", supplierId);
+            ViewBag.SupplierId = new SelectList(await _dataRepository.GetSuppliersAsync(), "SupplierId", "CompanyName", supplierId);
         }
 
-        private void PopulateCategoriesDropDownList(object categoryId = null)
+        private async Task PopulateCategoriesDropDownListAsync(object categoryId = null)
         {
-            ViewBag.CategoryId = new SelectList(_dataRepository.GetCategories(), "CategoryId", "CategoryName", categoryId);
+            ViewBag.CategoryId = new SelectList(await _dataRepository.GetCategoriesAsync(), "CategoryId", "CategoryName", categoryId);
         }
 
     }

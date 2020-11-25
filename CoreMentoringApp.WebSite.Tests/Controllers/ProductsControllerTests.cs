@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
@@ -31,9 +32,9 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
 
 
         [Fact]
-        public void Index_ReturnsViewResultWithListOfProducts()
+        public async Task Index_ReturnsViewResultWithListOfProducts()
         {
-            _mockDataRepository.Setup(repo => repo.GetProducts(3))
+            _mockDataRepository.Setup(repo => repo.GetProductsAsync(3))
                 .Returns(GetTestProducts())
                 .Verifiable();
             _mockOptions.Setup(opt => opt.Value)
@@ -41,7 +42,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Index();
+            var result = await controller.Index();
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<Product>>(viewResult.Model);
@@ -51,18 +52,18 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Create_ReturnsViewWithProductViewModel()
+        public async Task Create_ReturnsViewWithProductViewModel()
         {
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Create();
+            var result = await controller.Create();
 
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.IsAssignableFrom<ProductViewModel>(viewResult.Model);
         }
 
         [Fact]
-        public void Create_RedirectsToDetailsActionWithNewlyCreatedProductIdInRoute()
+        public async Task Create_RedirectsToDetailsActionWithNewlyCreatedProductIdInRoute()
         {
             int productIdTest = 7;
             var productViewModel = new ProductViewModel();
@@ -73,15 +74,15 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockMapper.Setup(m => m.Map<Product>(productViewModel))
                 .Returns(product)
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.CreateProduct(product))
-                .Returns(product)
+            _mockDataRepository.Setup(m => m.CreateProductAsync(product))
+                .Returns(Task.FromResult(product))
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.Commit())
+            _mockDataRepository.Setup(m => m.CommitAsync())
                 .Verifiable();
             
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Create(productViewModel);
+            var result = await controller.Create(productViewModel);
 
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Products", redirectToActionResult.ControllerName);
@@ -91,20 +92,20 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Details_ReturnsViewWithProductViewModel()
+        public async Task Details_ReturnsViewWithProductViewModel()
         {
             int productId = 7;
             var product = new Product() {ProductId = productId};
             var productViewModel = new ProductViewModel() {ProductId = productId};
-            _mockDataRepository.Setup(m => m.GetProductById(productId))
-                .Returns(product)
+            _mockDataRepository.Setup(m => m.GetProductByIdAsync(productId))
+                .Returns(Task.FromResult(product))
                 .Verifiable();
             _mockMapper.Setup(m => m.Map<ProductViewModel>(product))
                 .Returns(productViewModel)
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Details(productId);
+            var result = await controller.Details(productId);
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var act = Assert.IsAssignableFrom<ProductViewModel>(viewResult.Model);
@@ -112,20 +113,20 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Details_ReturnsNotFound_GivenIdOfNotExistedProduct()
+        public async Task Details_ReturnsNotFound_GivenIdOfNotExistedProduct()
         {
             int productId = 7;
-            _mockDataRepository.Setup(m => m.GetProductById(productId))
+            _mockDataRepository.Setup(m => m.GetProductByIdAsync(productId))
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Details(productId);
+            var result = await controller.Details(productId);
 
             Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
-        public void Edit_ReturnsViewWithProductViewModel()
+        public async Task Edit_ReturnsViewWithProductViewModel()
         {
             int productIdTest = 7;
             var productViewModel = new ProductViewModel
@@ -136,22 +137,22 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             {
                 ProductId = productIdTest
             };
-            _mockDataRepository.Setup(m => m.GetProductById(productIdTest))
-                .Returns(product)
+            _mockDataRepository.Setup(m => m.GetProductByIdAsync(productIdTest))
+                .Returns(Task.FromResult(product))
                 .Verifiable();
             _mockMapper.Setup(m => m.Map<ProductViewModel>(product))
                 .Returns(productViewModel)
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Edit(productIdTest);
+            var result = await controller.Edit(productIdTest);
 
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.IsAssignableFrom<ProductViewModel>(viewResult.Model);
         }
 
         [Fact]
-        public void Edit_RedirectsIndexActionWithNewlyCreatedProductIdInRoute()
+        public async Task Edit_RedirectsIndexActionWithNewlyCreatedProductIdInRoute()
         {
             int productIdTest = 7;
             var productViewModel = new ProductViewModel();
@@ -162,15 +163,15 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockMapper.Setup(m => m.Map<Product>(productViewModel))
                 .Returns(product)
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.UpdateProduct(product))
-                .Returns(product)
+            _mockDataRepository.Setup(m => m.UpdateProductAsync(product))
+                .Returns(Task.FromResult(product))
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.Commit())
+            _mockDataRepository.Setup(m => m.CommitAsync())
                 .Verifiable();
 
             var controller = new ProductsController(_mockDataRepository.Object, _mockOptions.Object, _mockMapper.Object);
 
-            var result = controller.Edit(productViewModel);
+            var result = await controller.Edit(productViewModel);
 
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectToActionResult.ActionName);
@@ -178,7 +179,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
             _mockDataRepository.Verify();
         }
 
-        private List<Product> GetTestProducts()
+        private async Task<IEnumerable<Product>> GetTestProducts()
         {
             return new List<Product>
             {

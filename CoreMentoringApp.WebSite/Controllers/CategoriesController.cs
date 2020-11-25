@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +16,14 @@ namespace CoreMentoringApp.WebSite.Controllers
             _dataRepository = dataRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_dataRepository.GetCategories());
+            return View(await _dataRepository.GetCategoriesAsync());
         }
 
-        public IActionResult Image(int id)
+        public async Task<IActionResult> Image(int id)
         {
-            var category = _dataRepository.GetCategoryById(id);
+            var category = await _dataRepository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -32,9 +33,9 @@ namespace CoreMentoringApp.WebSite.Controllers
         }
 
         [HttpGet]
-        public IActionResult UploadImage(int id)
+        public async Task<IActionResult> UploadImage(int id)
         {
-            var category = _dataRepository.GetCategoryById(id);
+            var category = await _dataRepository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -45,14 +46,14 @@ namespace CoreMentoringApp.WebSite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UploadImage(UploadCategoryImageViewModel uploadCategoryImageViewModel)
+        public async Task<IActionResult> UploadImage(UploadCategoryImageViewModel uploadCategoryImageViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return View(uploadCategoryImageViewModel);
             }
 
-            var category = _dataRepository.GetCategoryById(uploadCategoryImageViewModel.CategoryId);
+            var category = await _dataRepository.GetCategoryByIdAsync(uploadCategoryImageViewModel.CategoryId);
             if (category == null)
             {
                 return NotFound();
@@ -60,12 +61,12 @@ namespace CoreMentoringApp.WebSite.Controllers
 
             using (var memoryStream = new MemoryStream())
             {
-                uploadCategoryImageViewModel.ImageFile.CopyTo(memoryStream);
+                await uploadCategoryImageViewModel.ImageFile.CopyToAsync(memoryStream);
                 category.Picture = memoryStream.ToArray();
             }
 
-            _dataRepository.UpdateCategory(category);
-            _dataRepository.Commit();
+            await _dataRepository.UpdateCategoryAsync(category);
+            await _dataRepository.CommitAsync();
 
             return RedirectToAction(nameof(Index));
         }

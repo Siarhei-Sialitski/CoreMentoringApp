@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CoreMentoringApp.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreMentoringApp.Data
 {
@@ -40,14 +42,14 @@ namespace CoreMentoringApp.Data
 
         #region Categories
 
-        public IEnumerable<Category> GetCategories()
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
-            return _categories;
+            return await _categories.AsQueryable().ToListAsync();
         }
 
-        public Category UpdateCategory(Category category)
+        public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            var categoryUpd = _categories.FirstOrDefault(c => c.CategoryId == category.CategoryId);
+            var categoryUpd = await _categories.AsQueryable().SingleOrDefaultAsync(c => c.CategoryId == category.CategoryId);
             if (categoryUpd != null)
             {
                 categoryUpd.Picture = category.Picture;
@@ -58,16 +60,16 @@ namespace CoreMentoringApp.Data
             return categoryUpd;
         }
 
-        public Category GetCategoryById(int id)
+        public async Task<Category> GetCategoryByIdAsync(int id)
         {
-            return _categories.FirstOrDefault(c => c.CategoryId == id);
+            return await _categories.AsQueryable().SingleOrDefaultAsync(c => c.CategoryId == id);
         }
 
         #endregion
 
         #region Products
 
-        public IEnumerable<Product> GetProducts(int count = 0)
+        public async Task<IEnumerable<Product>> GetProductsAsync(int count = 0)
         {
             var products = _products.AsQueryable();
             if (count != 0)
@@ -75,10 +77,10 @@ namespace CoreMentoringApp.Data
                 products = products.Take(count);
             }
 
-            return products;
+            return await products.ToListAsync();
         }
 
-        public Product CreateProduct(Product product)
+        public async Task<Product> CreateProductAsync(Product product)
         {
             _products.Add(product);
             product.ProductId = _products.Max(p => p.ProductId) + 1;
@@ -86,14 +88,14 @@ namespace CoreMentoringApp.Data
             return product;
         }
 
-        public Product GetProductById(int id)
+        public async Task<Product> GetProductByIdAsync(int id)
         {
-            return _products.FirstOrDefault(p => p.ProductId == id);
+            return await _products.AsQueryable().SingleOrDefaultAsync(p => p.ProductId == id);
         }
 
-        public Product UpdateProduct(Product product)
+        public async Task<Product> UpdateProductAsync(Product product)
         {
-            var productUpd = _products.SingleOrDefault(p => p.ProductId == product.ProductId);
+            var productUpd = await _products.AsQueryable().SingleOrDefaultAsync(p => p.ProductId == product.ProductId);
             if (productUpd != null)
             {
                 productUpd.CategoryId = product.CategoryId;
@@ -111,7 +113,7 @@ namespace CoreMentoringApp.Data
             return productUpd;
         }
 
-        public void DeleteProduct(Product product)
+        public async Task DeleteProductAsync(Product product)
         {
             _products.Remove(product);
         }
@@ -120,19 +122,19 @@ namespace CoreMentoringApp.Data
 
         #region Suppliers
 
-        public IEnumerable<Supplier> GetSuppliers()
+        public async Task<IEnumerable<Supplier>> GetSuppliersAsync()
         {
-            return _suppliers;
+            return await _suppliers.AsQueryable().ToListAsync();
         }
 
-        public Supplier GetSupplierById(int id)
+        public async Task<Supplier> GetSupplierByIdAsync(int id)
         {
-            return _suppliers.SingleOrDefault(s => s.SupplierId == id);
+            return await _suppliers.AsQueryable().SingleOrDefaultAsync(s => s.SupplierId == id);
         }
 
         #endregion
 
-        public int Commit()
+        public async Task<int> CommitAsync()
         {
             return 0;
         }

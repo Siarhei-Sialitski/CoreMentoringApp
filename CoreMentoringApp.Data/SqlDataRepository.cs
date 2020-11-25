@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.WebSite.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,30 +19,30 @@ namespace CoreMentoringApp.Data
 
         #region Categories
 
-        public IEnumerable<Category> GetCategories()
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
-            return _dbContext.Categories;
+            return await _dbContext.Categories.ToListAsync();
         }
 
-        public Category UpdateCategory(Category category)
+        public async Task<Category> UpdateCategoryAsync(Category category)
         {
             var entity = _dbContext.Categories.Attach(category);
             entity.State = EntityState.Modified;
             return category;
         }
 
-        public Category GetCategoryById(int id)
+        public async Task<Category> GetCategoryByIdAsync(int id)
         {
-            return _dbContext.Categories
+            return await _dbContext.Categories
                 .Include(c => c.Products)
-                .FirstOrDefault(c => c.CategoryId == id);
+                .SingleOrDefaultAsync(c => c.CategoryId == id);
         }
 
         #endregion
 
         #region Products
 
-        public IEnumerable<Product> GetProducts(int count = 0)
+        public async Task<IEnumerable<Product>> GetProductsAsync(int count = 0)
         {
             var products = _dbContext.Products.AsQueryable();
             if (count != 0)
@@ -49,33 +50,34 @@ namespace CoreMentoringApp.Data
                 products = products.Take(count);
             }
 
-            return products
+            return await products
                 .Include(p => p.Category)
-                .Include(p => p.Supplier);
+                .Include(p => p.Supplier)
+                .ToListAsync();
         }
 
-        public Product CreateProduct(Product product)
+        public async Task<Product> CreateProductAsync(Product product)
         {
-            _dbContext.Add(product);
+            await _dbContext.AddAsync(product);
             return product;
         }
 
-        public Product GetProductById(int id)
+        public async Task<Product> GetProductByIdAsync(int id)
         {
-            return _dbContext.Products
+            return await _dbContext.Products
                 .Include(p => p.Category)
                 .Include(p => p.Supplier)
-                .SingleOrDefault(p => p.ProductId == id);
+                .SingleOrDefaultAsync(p => p.ProductId == id);
         }
 
-        public Product UpdateProduct(Product product)
+        public async Task<Product> UpdateProductAsync(Product product)
         {
             var entity = _dbContext.Products.Attach(product);
             entity.State = EntityState.Modified;
             return product;
         }
 
-        public void DeleteProduct(Product product)
+        public async Task DeleteProductAsync(Product product)
         {
             _dbContext.Products.Remove(product);
         }
@@ -84,21 +86,21 @@ namespace CoreMentoringApp.Data
 
         #region Suppliers
 
-        public IEnumerable<Supplier> GetSuppliers()
+        public async Task<IEnumerable<Supplier>> GetSuppliersAsync()
         {
-            return _dbContext.Suppliers;
+            return await _dbContext.Suppliers.ToListAsync();
         }
 
-        public Supplier GetSupplierById(int id)
+        public async Task<Supplier> GetSupplierByIdAsync(int id)
         {
-            return _dbContext.Suppliers.SingleOrDefault(s => s.SupplierId == id);
+            return await _dbContext.Suppliers.SingleOrDefaultAsync(s => s.SupplierId == id);
         }
 
         #endregion
 
-        public int Commit()
+        public async  Task<int> CommitAsync()
         {
-            return _dbContext.SaveChanges();
+            return await _dbContext.SaveChangesAsync();
         }
         
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Areas.Api.Models;
@@ -24,17 +25,17 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> Get()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {
-            return Ok(_mapper.Map<IEnumerable<CategoryDTO>>(_repository.GetCategories()));
+            return Ok(_mapper.Map<IEnumerable<CategoryDTO>>(await _repository.GetCategoriesAsync()));
         }
 
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CategoryDTO> Get(int id)
+        public async Task<ActionResult<CategoryDTO>> Get(int id)
         {
-            var category = _repository.GetCategoryById(id);
+            var category = await _repository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -46,18 +47,18 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ProductDTO> Put(int id, [FromBody]ImageDTO imageDto)
+        public async Task<ActionResult<ProductDTO>> Put(int id, [FromBody]ImageDTO imageDto)
         {
-            var category = _repository.GetCategoryById(id);
+            var category = await _repository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
             }
 
             category.Picture = Convert.FromBase64String(imageDto.Image);
-            _repository.UpdateCategory(category);
+            await _repository.UpdateCategoryAsync(category);
 
-            if (_repository.Commit() > 0)
+            if (await _repository.CommitAsync() > 0)
             {
                 return Ok(_mapper.Map<CategoryDTO>(category));
             }

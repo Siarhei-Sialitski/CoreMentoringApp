@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using CoreMentoringApp.Core.Models;
 
 namespace CoreMentoringApp.Data
@@ -8,37 +9,37 @@ namespace CoreMentoringApp.Data
 
         #region Categories
 
-        IEnumerable<Category> GetCategories();
+        Task<IEnumerable<Category>> GetCategoriesAsync();
 
-        Category GetCategoryById(int id);
+        Task<Category> GetCategoryByIdAsync(int id);
 
-        Category UpdateCategory(Category category);
+        Task<Category> UpdateCategoryAsync(Category category);
 
         #endregion
 
         #region Products
 
-        IEnumerable<Product> GetProducts(int count = 0);
+        Task<IEnumerable<Product>> GetProductsAsync(int count = 0);
 
-        Product CreateProduct(Product product);
+        Task<Product> CreateProductAsync(Product product);
 
-        Product GetProductById(int id);
+        Task<Product> GetProductByIdAsync(int id);
 
-        Product UpdateProduct(Product product);
+        Task<Product> UpdateProductAsync(Product product);
 
-        void DeleteProduct(Product product);
+        Task DeleteProductAsync(Product product);
 
         #endregion
 
         #region Suppliers
 
-        IEnumerable<Supplier> GetSuppliers();
+        Task<IEnumerable<Supplier>> GetSuppliersAsync();
 
-        Supplier GetSupplierById(int id);
+        Task<Supplier> GetSupplierByIdAsync(int id);
 
         #endregion
 
-        int Commit();
+        Task<int> CommitAsync();
         
     }
 }

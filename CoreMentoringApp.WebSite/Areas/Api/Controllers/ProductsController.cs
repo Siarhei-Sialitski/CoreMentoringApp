@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
@@ -27,17 +28,17 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
-            return Ok(_mapper.Map<IEnumerable<ProductDTO>>(_repository.GetProducts()));
+            return Ok(_mapper.Map<IEnumerable<ProductDTO>>(await _repository.GetProductsAsync()));
         }
 
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ProductDTO> Get(int id)
+        public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            var product = _repository.GetProductById(id);
+            var product = await _repository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -48,11 +49,11 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<ProductDTO> Post(ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDto)
         {
             if (productDto.CategoryId.HasValue)
             {
-                var category = _repository.GetCategoryById(productDto.CategoryId.Value);
+                var category = await _repository.GetCategoryByIdAsync(productDto.CategoryId.Value);
                 if (category == null)
                 {
                     return BadRequest("CategoryId is invalid.");
@@ -61,7 +62,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
 
             if (productDto.SupplierId.HasValue)
             {
-                var category = _repository.GetSupplierById(productDto.SupplierId.Value);
+                var category = await _repository.GetSupplierByIdAsync(productDto.SupplierId.Value);
                 if (category == null)
                 {
                     return BadRequest("SupplierId is invalid.");
@@ -69,8 +70,8 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
             }
 
             var product = _mapper.Map<Product>(productDto);
-            _repository.CreateProduct(product);
-            if (_repository.Commit() > 0)
+            await _repository.CreateProductAsync(product);
+            if (await _repository.CommitAsync() > 0)
             {
                 var link = _linkGenerator.GetPathByAction(HttpContext,"Get", "Products",
                     new {id = product.ProductId});
@@ -84,9 +85,9 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Put(int id, ProductDTO productDto)
         {
-            var product = _repository.GetProductById(id);
+            var product = await _repository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -94,7 +95,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
 
             if (productDto.CategoryId.HasValue)
             {
-                var category = _repository.GetCategoryById(productDto.CategoryId.Value);
+                var category = await _repository.GetCategoryByIdAsync(productDto.CategoryId.Value);
                 if (category == null)
                 {
                     return BadRequest("CategoryId is invalid.");
@@ -103,7 +104,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
 
             if (productDto.SupplierId.HasValue)
             {
-                var category = _repository.GetSupplierById(productDto.SupplierId.Value);
+                var category = await _repository.GetSupplierByIdAsync(productDto.SupplierId.Value);
                 if (category == null)
                 {
                     return BadRequest("SupplierId is invalid.");
@@ -112,7 +113,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
 
             _mapper.Map(productDto, product);
 
-            if (_repository.Commit() > 0)
+            if (await _repository.CommitAsync() > 0)
             {
                 return Ok(_mapper.Map<ProductDTO>(product));
             }
@@ -124,16 +125,16 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ProductDTO> Delete(int id)
+        public async Task<ActionResult<ProductDTO>> Delete(int id)
         {
-            var product = _repository.GetProductById(id);
+            var product = await _repository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            _repository.DeleteProduct(product);
+            await _repository.DeleteProductAsync(product);
 
-            if (_repository.Commit() > 0)
+            if (await _repository.CommitAsync() > 0)
             {
                 return Ok();
             }

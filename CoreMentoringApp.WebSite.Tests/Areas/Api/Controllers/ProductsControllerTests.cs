@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
@@ -29,11 +30,11 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
         }
 
         [Fact]
-        public void Get_ReturnsListOfProductDTO()
+        public async Task Get_ReturnsListOfProductDTO()
         {
             var testProducts = GetTestProducts();
-            var testProductsDto = GetTestProductsDTO();
-            _mockDataRepository.Setup(repo => repo.GetProducts(It.IsAny<int>()))
+            var testProductsDto = await GetTestProductsDTO();
+            _mockDataRepository.Setup(repo => repo.GetProductsAsync(It.IsAny<int>()))
                 .Returns(testProducts)
                 .Verifiable();
             _mockMapper.Setup(m => m.Map<IEnumerable<ProductDTO>>(It.IsAny<IEnumerable<Product>>()))
@@ -41,31 +42,31 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockMapper.Object, _mockLinkGenerator.Object);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
             var actionResult = Assert.IsType<ActionResult<IEnumerable<ProductDTO>>>(result);
             var okObjectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
             var model = Assert.IsAssignableFrom<IEnumerable<ProductDTO>>(okObjectResult.Value);
-            Assert.Equal(testProductsDto.Count, model.Count());
+            Assert.Equal(testProductsDto.Count(), model.Count());
             _mockDataRepository.Verify();
             _mockMapper.Verify();
         }
 
         [Fact]
-        public void Get_ReturnsProductDTO_WhenIdPassed()
+        public async Task Get_ReturnsProductDTO_WhenIdPassed()
         {
-            var testProduct = GetTestProducts().First();
-            var testProductDto = GetTestProductsDTO().First();
+            var testProduct = new Product();
+            var testProductDto = new ProductDTO();
             var id = 1;
-            _mockDataRepository.Setup(repo => repo.GetProductById(id))
-                .Returns(testProduct)
+            _mockDataRepository.Setup(repo => repo.GetProductByIdAsync(id))
+                .Returns(Task.FromResult(testProduct))
                 .Verifiable();
             _mockMapper.Setup(m => m.Map<ProductDTO>(testProduct))
                 .Returns(testProductDto)
                 .Verifiable();
             var controller = new ProductsController(_mockDataRepository.Object, _mockMapper.Object, _mockLinkGenerator.Object);
 
-            var result = controller.Get(id);
+            var result = await controller.Get(id);
             
             var actionResult = Assert.IsType<ActionResult<ProductDTO>>(result);
             var okObjectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
@@ -76,57 +77,56 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
         }
 
         [Fact]
-        public void Post_ChecksSupplierAndCategoryExisting()
+        public async Task Post_ChecksSupplierAndCategoryExisting()
         {
-            var testProductDto = GetTestProductsDTO().First();
-            _mockDataRepository.Setup(repo => repo.GetSupplierById(testProductDto.SupplierId.Value))
+            var testProductDto = GetTestProductsDTO().Result.First();
+            _mockDataRepository.Setup(repo => repo.GetSupplierByIdAsync(testProductDto.SupplierId.Value))
                 .Verifiable();
-            _mockDataRepository.Setup(repo => repo.GetCategoryById(testProductDto.CategoryId.Value))
-                .Returns(new Category())
+            _mockDataRepository.Setup(repo => repo.GetCategoryByIdAsync(testProductDto.CategoryId.Value))
+                .Returns(Task.FromResult(new Category()))
                 .Verifiable();
 
             var controller = new ProductsController(_mockDataRepository.Object, _mockMapper.Object, _mockLinkGenerator.Object);
 
-            controller.Post(testProductDto);
+            await controller.Post(testProductDto);
             
             _mockDataRepository.Verify();
         }
 
         [Fact]
-        public void Put_ReceivesExistingProductFromRepository()
+        public async Task Put_ReceivesExistingProductFromRepository()
         {
-            var testProductDto = GetTestProductsDTO().First();
+            var testProductDto = GetTestProductsDTO().Result.First();
             int id = 1;
-            _mockDataRepository.Setup(repo => repo.GetProductById(id))
+            _mockDataRepository.Setup(repo => repo.GetProductByIdAsync(id))
                 .Verifiable();
 
             var controller = new ProductsController(_mockDataRepository.Object, _mockMapper.Object, _mockLinkGenerator.Object);
 
-            controller.Put(id, testProductDto);
+            await controller.Put(id, testProductDto);
 
             _mockDataRepository.Verify();
         }
 
         [Fact]
-        public void Delete_ReceivesExistingProductFromRepositoryAndDelete()
+        public async Task Delete_ReceivesExistingProductFromRepositoryAndDelete()
         {
-            var testProductDto = GetTestProductsDTO().First();
-            var testProduct = GetTestProducts().First();
+            var testProduct = new Product();
             int id = 1;
-            _mockDataRepository.Setup(repo => repo.GetProductById(id))
-                .Returns(testProduct)
+            _mockDataRepository.Setup(repo => repo.GetProductByIdAsync(id))
+                .Returns(Task.FromResult(testProduct))
                 .Verifiable();
-            _mockDataRepository.Setup(repo => repo.DeleteProduct(testProduct))
+            _mockDataRepository.Setup(repo => repo.DeleteProductAsync(testProduct))
                 .Verifiable();
 
             var controller = new ProductsController(_mockDataRepository.Object, _mockMapper.Object, _mockLinkGenerator.Object);
 
-            controller.Delete(id);
+            await controller.Delete(id);
 
             _mockDataRepository.Verify();
         }
 
-        private List<Product> GetTestProducts()
+        private async Task<IEnumerable<Product>> GetTestProducts()
         {
             return new List<Product>
             {
@@ -136,7 +136,7 @@ namespace CoreMentoringApp.WebSite.Tests.Areas.Api.Controllers
             };
         }
 
-        private List<ProductDTO> GetTestProductsDTO()
+        private async Task<IEnumerable<ProductDTO>> GetTestProductsDTO()
         {
             return new List<ProductDTO>
             {

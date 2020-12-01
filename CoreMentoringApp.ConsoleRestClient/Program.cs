@@ -1,55 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using CoreMentoringApp.ConsoleRestClient.Models;
-using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace CoreMentoringApp.ConsoleRestClient
 {
     class Program
     {
-        static HttpClient client = new HttpClient();
-
-        static void Main(string[] args)
+        
+        static async Task Main(string[] args)
         {
-            RunAsync().GetAwaiter().GetResult();
+            await RunAsync();
         }
 
         static async Task RunAsync()
         {
-            client.BaseAddress = new Uri("https://localhost:44346/api/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            string userInput = string.Empty;
-            do
-            {
-                if (!string.IsNullOrEmpty(userInput))
+            var builder = new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
                 {
-                    switch (userInput.ToLower())
+                    services.AddHttpClient();
+                    services.AddTransient<IEntitiesService, RestApiEntitiesService>();
+                    services.AddTransient<IEntitiesHandler, ConsoleEntitiesHandler>();
+                }).UseConsoleLifetime();
+
+            var host = builder.Build();
+            using (var serviceScope = host.Services.CreateScope())
+            {
+                var services = serviceScope.ServiceProvider;
+                string userInput = string.Empty;
+                do
+                {
+                    if (!string.IsNullOrEmpty(userInput))
                     {
-                        case "p":
+                        switch (userInput.ToLower())
                         {
-                            ShowList(await GetAsync<IEnumerable<Product>>("products"));
-                            break;
-                        }
-                        case "c":
-                        {
-                            ShowList(await GetAsync<IEnumerable<Category>>("categories"));
-                            break;
+                            case "p":
+                            {
+                                var entitiesProviderService = services.GetRequiredService<IEntitiesService>();
+                                var entitiesHandler = services.GetRequiredService<IEntitiesHandler>();
+                                await entitiesHandler.HandleAsync(await entitiesProviderService.GetProductsAsync());
+                                break;
+                            }
+                            case "c":
+                            {
+                                var entitiesProviderService = services.GetRequiredService<IEntitiesService>();
+                                var entitiesHandler = services.GetRequiredService<IEntitiesHandler>();
+                                await entitiesHandler.HandleAsync(await entitiesProviderService.GetCategoriesAsync());
+                                break;
+                            }
                         }
                     }
+                    userInput = GetUserInput();
 
-                    Console.WriteLine();
-                    Console.WriteLine("<----------------------------------------------------->");
-                    Console.WriteLine();
-                }
-
-                userInput = GetUserInput();
-
-            } while (!userInput.Equals("E", StringComparison.OrdinalIgnoreCase));
+                } while (!userInput.Equals("E", StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         static string GetUserInput()
@@ -59,22 +63,6 @@ namespace CoreMentoringApp.ConsoleRestClient
             Console.WriteLine("C - get all categories");
             Console.WriteLine("E - exit");
             return Convert.ToString(Console.ReadLine());
-        }
-
-        static void ShowList<T>(IEnumerable<T> items)
-        {
-            foreach (var item in items)
-            {
-                Console.WriteLine(JsonConvert.SerializeObject(item));
-            }
-        }
-
-        static async Task<T> GetAsync<T>(string path)
-        {
-            HttpResponseMessage response = await client.GetAsync(path);
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsAsync<T>();
         }
         
     }

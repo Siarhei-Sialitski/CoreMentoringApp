@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CoreMentoringApp.Core.Models;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Controllers;
@@ -22,14 +23,14 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Index_ReturnsViewResultWithListOfCategories()
+        public async Task Index_ReturnsViewResultWithListOfCategories()
         {
-            _mockDataRepository.Setup(repo => repo.GetCategories())
-                .Returns(GetTestCategories)
+            _mockDataRepository.Setup(repo => repo.GetCategoriesAsync())
+                .Returns(GetTestCategories())
                 .Verifiable();
             var controller = new CategoriesController(_mockDataRepository.Object);
 
-            var result = controller.Index();
+            var result = await controller.Index();
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<Category>>(
@@ -39,7 +40,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Image_ReturnsFileWithImageContent()
+        public async Task Image_ReturnsFileWithImageContent()
         {
             int categoryIdTest = 1;
             var category = new Category
@@ -47,12 +48,12 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
                 CategoryId = categoryIdTest,
                 Picture = new byte[0]
             };
-            _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
-                .Returns(category)
+            _mockDataRepository.Setup(repo => repo.GetCategoryByIdAsync(categoryIdTest))
+                .Returns(Task.FromResult(category))
                 .Verifiable();
             var controller = new CategoriesController(_mockDataRepository.Object);
 
-            var result = controller.Image(categoryIdTest);
+            var result = await controller.Image(categoryIdTest);
 
             var fileResult = Assert.IsAssignableFrom<FileResult>(result);
             Assert.Contains("image/", fileResult.ContentType);
@@ -60,22 +61,22 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void Image_ReturnsNotFoundResult_GivenNotExistedCategoryId()
+        public async Task Image_ReturnsNotFoundResult_GivenNotExistedCategoryId()
         {
-            int categoryIdTest = 1;
-            _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
-                .Returns(() => null)
+            int categoryIdTest = -1;
+            _mockDataRepository.Setup(repo => repo.GetCategoryByIdAsync(categoryIdTest))
+                .Returns(Task.FromResult<Category>(null))
                 .Verifiable();
             var controller = new CategoriesController(_mockDataRepository.Object);
 
-            var result = controller.Image(categoryIdTest);
+            var result = await controller.Image(categoryIdTest);
 
             Assert.IsType<NotFoundResult>(result);
             _mockDataRepository.Verify();
         }
 
         [Fact]
-        public void UploadImage_ReturnsViewWithUpload()
+        public async Task UploadImage_ReturnsViewWithUpload()
         {
             int categoryIdTest = 1;
             string categoryNameTest = "nametest";
@@ -85,12 +86,12 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
                 CategoryName = categoryNameTest,
                 Picture = new byte[0]
             };
-            _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
-                .Returns(category)
+            _mockDataRepository.Setup(repo => repo.GetCategoryByIdAsync(categoryIdTest))
+                .Returns(Task.FromResult(category))
                 .Verifiable();
             var controller = new CategoriesController(_mockDataRepository.Object);
 
-            var result = controller.UploadImage(categoryIdTest);
+            var result = await controller.UploadImage(categoryIdTest);
 
             var viewResult = Assert.IsAssignableFrom<ViewResult>(result);
             var model = Assert.IsAssignableFrom<UploadCategoryImageViewModel>(viewResult.Model);
@@ -100,7 +101,7 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
         }
 
         [Fact]
-        public void UploadImage_RedirectsToIndexAction()
+        public async Task UploadImage_RedirectsToIndexAction()
         {
             int categoryIdTest = 1;
             var category = new Category
@@ -114,23 +115,23 @@ namespace CoreMentoringApp.WebSite.Tests.Controllers
                 CategoryId = categoryIdTest,
                 ImageFile = mockFile.Object
             };
-            _mockDataRepository.Setup(repo => repo.GetCategoryById(categoryIdTest))
-                .Returns(category)
+            _mockDataRepository.Setup(repo => repo.GetCategoryByIdAsync(categoryIdTest))
+                .Returns(Task.FromResult(category))
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.UpdateCategory(category))
+            _mockDataRepository.Setup(m => m.UpdateCategoryAsync(category))
                 .Verifiable();
-            _mockDataRepository.Setup(m => m.Commit())
+            _mockDataRepository.Setup(m => m.CommitAsync())
                 .Verifiable();
             var controller = new CategoriesController(_mockDataRepository.Object);
 
-            var result = controller.UploadImage(categoryViewModel);
+            var result = await controller.UploadImage(categoryViewModel);
 
             var redirectToActionResultResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectToActionResultResult.ActionName);
             _mockDataRepository.Verify();
         }
 
-        private List<Category> GetTestCategories()
+        private async Task<IEnumerable<Category>> GetTestCategories()
         {
             return new List<Category>
             {

@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMentoringApp.Data", "Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMentoringApp.WebSite.Tests", "CoreMentoringApp.WebSite.Tests\CoreMentoringApp.WebSite.Tests.csproj", "{417F434E-A84F-4E50-8FEE-B9AA6AAAFC52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMentoringApp.ConsoleRestClient", "CoreMentoringApp.ConsoleRestClient\CoreMentoringApp.ConsoleRestClient.csproj", "{4C78017D-6F93-45EA-A0CF-5DCA7F4744BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMentoringApp.ConsoleRestClient", "CoreMentoringApp.ConsoleRestClient\CoreMentoringApp.ConsoleRestClient.csproj", "{4C78017D-6F93-45EA-A0CF-5DCA7F4744BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMentoringApp.HtmlJsRestClient", "CoreMentoringApp.HtmlJsRestClient\CoreMentoringApp.HtmlJsRestClient.csproj", "{ACCAF5B2-F40E-4791-9335-6CB371AC3CAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMentoringApp.HtmlJsRestClient", "CoreMentoringApp.HtmlJsRestClient\CoreMentoringApp.HtmlJsRestClient.csproj", "{ACCAF5B2-F40E-4791-9335-6CB371AC3CAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMentoringApp.WebSite.IntegrationTests", "CoreMentoringApp.WebSite.IntegrationTests\CoreMentoringApp.WebSite.IntegrationTests.csproj", "{A6760EC6-73A1-4141-9041-9B3AC34A81F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{ACCAF5B2-F40E-4791-9335-6CB371AC3CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACCAF5B2-F40E-4791-9335-6CB371AC3CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACCAF5B2-F40E-4791-9335-6CB371AC3CAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6760EC6-73A1-4141-9041-9B3AC34A81F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6760EC6-73A1-4141-9041-9B3AC34A81F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6760EC6-73A1-4141-9041-9B3AC34A81F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6760EC6-73A1-4141-9041-9B3AC34A81F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

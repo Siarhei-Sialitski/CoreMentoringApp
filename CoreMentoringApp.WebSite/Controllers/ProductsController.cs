@@ -5,12 +5,14 @@ using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Filters;
 using CoreMentoringApp.WebSite.Options;
 using CoreMentoringApp.WebSite.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 
 namespace CoreMentoringApp.WebSite.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
 

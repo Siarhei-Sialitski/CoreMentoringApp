@@ -39,20 +39,35 @@
             </nav>
         </header>
     }
-
-@if (IsSectionDefined("Breadcrumbs"))
-{
-    @(await RenderSectionAsync("Breadcrumbs", false))
-}
-else
-{
-    <div class="container">
-        <vc:breadcrumbs context="@ViewContext">
-        </vc:breadcrumbs>
-    </div>
-}
-
 <div class="container">
+    <div class="row">
+    <div class="col-md-8">
+        @if (IsSectionDefined("Breadcrumbs"))
+        {
+            @(await RenderSectionAsync("Breadcrumbs", false))
+        }
+        else
+        {
+            <div class="container">
+                <vc:breadcrumbs context="@ViewContext">
+                </vc:breadcrumbs>
+            </div>
+        }
+    </div>
+        <div class="col-md-4">
+            @if (IsSectionDefined("Login"))
+            {
+                @(await RenderSectionAsync("Login", false))
+            }
+            else
+            {
+                @await Html.PartialAsync("_LoginPartial")
+            }
+        </div>
+    </div>
+</div>
+
+    <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

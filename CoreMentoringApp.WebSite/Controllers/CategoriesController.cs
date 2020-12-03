@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreMentoringApp.WebSite.Controllers
 {
+    [Authorize]
     public class CategoriesController : Controller
     {
 

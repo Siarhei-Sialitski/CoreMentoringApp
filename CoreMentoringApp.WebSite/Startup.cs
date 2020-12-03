@@ -1,7 +1,9 @@
+using System.Reflection;
 using AutoMapper;
 using CoreMentoringApp.Data;
 using CoreMentoringApp.WebSite.Breadcrumbs;
 using CoreMentoringApp.WebSite.Cache;
+using CoreMentoringApp.WebSite.Email;
 using CoreMentoringApp.WebSite.Filters.CustomActionLogger;
 using CoreMentoringApp.WebSite.Middlewares;
 using CoreMentoringApp.WebSite.Models;
@@ -9,6 +11,8 @@ using CoreMentoringApp.WebSite.Options;
 using CoreMentoringApp.WebSite.Profiles;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +39,10 @@ namespace CoreMentoringApp.WebSite
             services.AddDbContext<NorthwindDbContext>(options =>
             {
                 var connectionString = _configuration.GetConnectionString("NorthwindDataContext");
-                options.UseSqlServer(connectionString);
+                options.UseSqlServer(connectionString, sqlServerOptions =>
+                    {
+                        sqlServerOptions.MigrationsAssembly(typeof(NorthwindDbContext).GetTypeInfo().Assembly.GetName().Name);
+                    });
             });
             services.AddAutoMapper(typeof(AutoMapperProfile));
 
@@ -50,6 +57,22 @@ namespace CoreMentoringApp.WebSite
                 options.SwaggerDoc("v1", new OpenApiInfo() {Title = "Core Mentoring App Api", Version = "v1"});
             });
 
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<NorthwindDbContext>()
+                .AddDefaultTokenProviders();
+            services.AddAuthentication()
+                .AddFacebook(options =>
+                {
+                    options.AppId = _configuration["Authentication.Facebook.AppId"];
+                    options.AppSecret = _configuration["Authentication.Facebook.AppSecret"];
+
+                });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Home/Login"; 
+            });
+            services.AddTransient<IEmailSender, MailKitEmailSender>();
+
             #endregion
 
             #region Options
@@ -63,6 +86,7 @@ namespace CoreMentoringApp.WebSite
             services.AddOptions<ActionsLoggingOptions>()
                 .Bind(_configuration.GetSection(ActionsLoggingOptions.ActionsLogging))
                 .ValidateDataAnnotations();
+            services.Configure<MailKitOptions>(_configuration);
 
             #endregion
 
@@ -111,6 +135,7 @@ namespace CoreMentoringApp.WebSite
             app.UseRouting();
             app.UseCors(_coreAppRestApiSpecificOrigins);
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCacheMiddleware();

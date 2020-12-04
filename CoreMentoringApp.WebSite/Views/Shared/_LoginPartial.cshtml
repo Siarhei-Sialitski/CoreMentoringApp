@@ -1,7 +1,10 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using CoreMentoringApp.Data
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject IAuthorizationService AuthorizationService
 
 @if (SignInManager.IsSignedIn(User))
 {
@@ -10,6 +13,10 @@
             <li>
                 <label class="float-right">Hello @UserManager.GetUserName(User)</label>
             </li>
+            @if ((await AuthorizationService.AuthorizeAsync(User, AuthConstants.ADMIN_ROLE_POLICY)).Succeeded)
+            {
+                <li><a asp-controller="Administration" asp-action="Users" class="float-right">All users</a></li>
+            }
             <li>
                 <button type="submit" class="btn btn-link float-right">Log off</button>
             </li>

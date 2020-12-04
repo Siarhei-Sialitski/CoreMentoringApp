@@ -76,7 +76,10 @@ namespace CoreMentoringApp.WebSite
                     options.TenantId = _configuration["AzureAD.TenantId"];
                     options.CookieSchemeName = "Identity.External";
                 });
-
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AuthConstants.ADMIN_ROLE_POLICY, policy => policy.RequireRole(AuthConstants.ADMIN_ROLE));
+            });
 
             services.Configure<OpenIdConnectOptions>(AzureADDefaults.OpenIdScheme, options =>
             {
@@ -84,7 +87,7 @@ namespace CoreMentoringApp.WebSite
                 options.TokenValidationParameters.ValidateIssuer = false;
                 options.Scope.Add("Email");
             });
-
+            
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/Login"; 

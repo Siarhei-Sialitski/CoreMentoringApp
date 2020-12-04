@@ -193,7 +193,7 @@ namespace CoreMentoringApp.WebSite.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
+            var redirectUrl =_linkGenerator.GetPathByAction("ExternalLoginCallback", "Account", new {ReturnUrl = returnUrl});
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }

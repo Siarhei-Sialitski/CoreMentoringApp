@@ -9,6 +9,9 @@ using CoreMentoringApp.WebSite.Middlewares;
 using CoreMentoringApp.WebSite.Models;
 using CoreMentoringApp.WebSite.Options;
 using CoreMentoringApp.WebSite.Profiles;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -65,11 +68,26 @@ namespace CoreMentoringApp.WebSite
                 {
                     options.AppId = _configuration["Authentication.Facebook.AppId"];
                     options.AppSecret = _configuration["Authentication.Facebook.AppSecret"];
-
+                })
+                .AddAzureAD(options =>
+                {
+                    options.Instance = _configuration["AzureAD.Instance"];
+                    options.ClientId = _configuration["AzureAD.ClientId"];
+                    options.TenantId = _configuration["AzureAD.TenantId"];
+                    options.CookieSchemeName = "Identity.External";
                 });
+
+
+            services.Configure<OpenIdConnectOptions>(AzureADDefaults.OpenIdScheme, options =>
+            {
+                options.Authority = options.Authority + "/v2.0/";
+                options.TokenValidationParameters.ValidateIssuer = false;
+                options.Scope.Add("Email");
+            });
+
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Home/Login"; 
+                options.LoginPath = "/Account/Login"; 
             });
             services.AddTransient<IEmailSender, MailKitEmailSender>();
 

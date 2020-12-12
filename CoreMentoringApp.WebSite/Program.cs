@@ -1,7 +1,10 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
+using CoreMentoringApp.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -10,7 +13,7 @@ namespace CoreMentoringApp.WebSite
     public class Program
     {
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -33,7 +36,22 @@ namespace CoreMentoringApp.WebSite
             try
             {
                 Log.Information("Starting web host");
-                CreateHostBuilder(args).Build().Run();
+                var host = CreateHostBuilder(args).Build();
+
+                using (var scope = host.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    try
+                    {
+                        await SeedData.Initialize(services);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "An error occured seeding DB.");
+                    }
+                }
+
+                host.Run();
                 Log.Information("Web host terminated");
             }
             catch (Exception ex)

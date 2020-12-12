@@ -1,9 +1,11 @@
 ﻿using CoreMentoringApp.Core.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreMentoringApp.WebSite.Models
 {
-    public class NorthwindDbContext : DbContext
+    public class NorthwindDbContext : IdentityDbContext<IdentityUser>
     {
         public NorthwindDbContext()
         {}
@@ -17,6 +19,7 @@ namespace CoreMentoringApp.WebSite.Models
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasKey(e => e.CategoryId);

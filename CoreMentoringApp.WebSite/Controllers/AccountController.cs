@@ -84,10 +84,7 @@ namespace CoreMentoringApp.WebSite.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = _linkGenerator.GetPathByAction("ConfirmEmail", "Account", new {userId = user.Id, code});
-                    await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
-                        "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>");
+                    await SendConfirmationEmailAsync(user);
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToLocal(returnUrl);
                 }
@@ -135,7 +132,7 @@ namespace CoreMentoringApp.WebSite.Controllers
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = _linkGenerator.GetPathByAction("ResetPassword", "Account", new { userId = user.Id, code });
+                var callbackUrl = _linkGenerator.GetUriByAction(HttpContext, "ResetPassword", "Account", new { userId = user.Id, code });
                 await _emailSender.SendEmailAsync(model.Email, "Reset Password",
                    "Please reset your password by clicking here: <a href=\"" + callbackUrl + "\">link</a>");
                 return View("ForgotPasswordConfirmation");
@@ -193,7 +190,7 @@ namespace CoreMentoringApp.WebSite.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            var redirectUrl =_linkGenerator.GetPathByAction("ExternalLoginCallback", "Account", new {ReturnUrl = returnUrl});
+            var redirectUrl = _linkGenerator.GetUriByAction(HttpContext, "ExternalLoginCallback", "Account", new {ReturnUrl = returnUrl});
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
@@ -242,6 +239,7 @@ namespace CoreMentoringApp.WebSite.Controllers
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    await SendConfirmationEmailAsync(user);
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
@@ -282,5 +280,14 @@ namespace CoreMentoringApp.WebSite.Controllers
             
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
+
+        private async Task SendConfirmationEmailAsync(IdentityUser user)
+        {
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = _linkGenerator.GetUriByAction(HttpContext, "ConfirmEmail", "Account", new { userId = user.Id, code });
+            await _emailSender.SendEmailAsync(user.Email, "Confirm your account",
+                "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>");
+        }
+
     }
 }

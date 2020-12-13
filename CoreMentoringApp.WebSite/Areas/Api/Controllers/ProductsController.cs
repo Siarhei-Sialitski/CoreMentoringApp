@@ -73,7 +73,7 @@ namespace CoreMentoringApp.WebSite.Areas.Api.Controllers
             await _repository.CreateProductAsync(product);
             if (await _repository.CommitAsync() > 0)
             {
-                var link = _linkGenerator.GetPathByAction(HttpContext,"Get", "Products",
+                var link = _linkGenerator.GetUriByAction(HttpContext,"Get", "Products",
                     new {id = product.ProductId});
                 return Created(link, _mapper.Map<ProductDTO>(product));
             }
